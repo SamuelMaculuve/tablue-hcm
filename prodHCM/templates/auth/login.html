@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% load static %}
+    <link href="{% static 'bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'bootstrap/css/font-awesome.min.css' %}" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+        }
+        /* Enterprise*/
+        .full-screen {
+            height: 100vh;
+        }
+        .bg-black {
+            background-color: #080808;
+        }
+        .text-black{
+            color: black;
+        }
+
+        .side a{
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 25px;
+            line-height: 20px;
+            letter-spacing: 0.5px;
+            padding-bottom: 70px;
+        }
+
+        .logo-f-page{
+            padding-top: 70px;
+        }
+
+
+        #create_enterprise_account .custom-btn{
+            text-align: center;
+            width: 500px;
+        }
+
+        #successModal .custom-btn{
+            --bs-btn-color: black;
+            --bs-btn-bg: #D9D9D9;
+            --bs-btn-border-color: #D9D9D9;
+            --bs-btn-hover-color: #fff;
+            --bs-btn-hover-bg: #D9D9D9;
+            --bs-btn-hover-border-color: #D9D9D9;
+            --bs-btn-focus-shadow-rgb: 49, 132, 253;
+            --bs-btn-active-color: #fff;
+            --bs-btn-active-bg: #D9D9D9;
+            --bs-btn-active-border-color: #D9D9D9;
+            --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+            --bs-btn-disabled-color: #fff;
+            --bs-btn-disabled-bg: #D9D9D9;
+            --bs-btn-disabled-border-color: #D9D9D9;
+            border-radius: 0;
+            border: none;
+        }
+        /*Register*/
+        .step {
+            display: none;
+        }
+        .step.active {
+            display: block;
+        }
+        .form-control {
+            border: 0.3px solid #D9D9D9;
+            border-radius: 5px;
+        }
+        .input-group-text {
+            background-color: #ffff;
+            padding-right: 20px;
+            padding-left: 20px;
+            text-align: center;
+        }
+        .form-control:focus {
+            box-shadow: none;
+        }
+        input[type=file]::file-selector-button {
+            color: transparent;
+            background-color: transparent;
+            padding: 5px 0px 5px 0px;
+        }
+        .text-form-h2{
+            font-weight: 400;
+            font-size: 16px;
+            line-height: 19.5px;
+        }
+        .text-form-h3{
+            font-weight: 500;
+            font-size: 25px;
+            line-height: 22px;
+            margin-bottom: 30px;
+        }
+
+        #multiStepForm .custom-btn {
+            text-align: center;
+            width: 500px;
+        }
+        .btn-close-white{
+            border: 1px solid #D9D9D9;
+        }
+        .modal-content {
+            border: none;
+            border-radius: 0;
+        }
+        .modal-header {
+            border-bottom: none;
+        }
+        .modal-footer {
+            display: ruby-text;
+            border-top: none;
+        }
+        #worning p {
+            margin-bottom: 0.3rem !important;
+        }
+
+        #alphanumeric-page .form-group {
+            position: relative;
+        }
+        #alphanumeric-page .form-group label {
+            position: absolute;
+            top: -12px;
+            left: 15px;
+            padding: 0 5px;
+            font-size: 12px;
+            color: #000 !important;
+            background: #f7faff;
+        }
+        .form-control {
+            background-color: #F7FAFE;
+        }
+        #alphanumeric-page .form-control {
+            padding-top: 20px;
+            background-color: transparent !important;
+        }
+        #alphanumeric-page .form-label-required::after {
+            content: '*';
+            color: red;
+            margin-left: 2px;
+        }
+        #alphanumeric-page .custom-checkbox .form-check-input {
+            width: 20px;
+            height: 20px;
+        }
+        #alphanumeric-page .custom-btn {
+            background-color: black;
+            color: white;
+            border-radius: 5px;
+            padding: 10px 20px;
+            font-weight: bold;
+        }
+        #alphanumeric-page .border{
+            margin: 10px;
+            padding: 50px 50px 20px 20px;
+            border-radius: 9px;
+        }
+        #alphanumeric-page .form-check-input:checked {
+            background-color: #141414 !important;
+            border-color: #141414 !important;
+        }
+        #alphanumeric-page .form-check-label{
+            margin-left: 10px;
+        }
+
+        #quotation .form-group {
+            position: relative;
+        }
+        #quotation  .form-group label {
+            position: absolute;
+            top: -10px;
+            left: 15px;
+            background-color: white;
+            padding: 0 5px;
+            font-size: 12px;
+            color: #000;
+            z-index: 100;
+        }
+        #quotation .form-control {
+            padding: 10px;
+        }
+        #quotation .form-label-required::after {
+            content: '*';
+            color: red;
+            margin-left: 2px;
+        }
+        #quotation .custom-checkbox .form-check-input {
+            width: 20px;
+            height: 20px;
+        }
+        #quotation .custom-btn {
+            background-color: black;
+            color: white;
+            border-radius: 5px;
+            padding: 10px 20px;
+            font-weight: bold;
+        }
+        #quotation .custom-addon {
+            background-color: #f8f9fa;
+            border: none;
+            padding: 10px;
+            font-size: 16px;
+        }
+        #quotation .border{
+            margin: 10px;
+            padding: 50px 50px 20px 20px;
+            border-radius: 9px;
+        }
+        #quotation .input-group>:not(:first-child):not(.dropdown-menu):not(.valid-tooltip):not(.valid-feedback):not(.invalid-tooltip):not(.invalid-feedback) {
+            margin-left: 10px !important;
+        }
+        #quotation .form-check-label{
+            margin-left: 10px;
+        }
+        #quotation .form-check-input:checked {
+            background-color: #141414 !important;
+            border-color: #141414 !important;
+        }
+
+        #invoice .upload-container {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            padding: 30px;
+            margin: 50px auto;
+            max-width: 600px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+        #invoice .upload-container .file-upload {
+            border: 2px dashed #bbb;
+            padding: 20px;
+            text-align: center;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: border-color 0.3s ease;
+        }
+        #invoice .upload-container .file-upload:hover {
+            border-color: #888;
+        }
+        #invoice  .upload-container .file-upload i {
+            font-size: 48px;
+            color: #888;
+        }
+        #invoice .upload-container .file-upload input[type="file"] {
+            display: none;
+        }
+        #invoice .upload-container .file-upload-label {
+            font-size: 16px;
+            margin-top: 10px;
+            display: block;
+            color: #333;
+        }
+        #invoice .upload-container .btn-submit {
+            margin-top: 20px;
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+        }
+        #invoice .border{
+            margin: 10px;
+            padding: 50px 50px 20px 20px;
+            border-radius: 9px;
+        }
+
+
+    </style>
+    <title>Tablu tech</title>
+</head>
+<body>
+{% load crispy_forms_tags %}
+<div class="container login-container">
+    <div class="row justify-content-center">
+        <div class="col-xl-4 col-lg-12 col-md-12 col-sm-12 login-form-1 mt-4">
+
+            <div class="text-center mt-5 mb-5">
+                <img  class="icon_dashboard img-fluid" src="https://afrikarealestate.com/storage/logo_1@4x%201.png" alt="Logo">
+            </div>
+                <p class="text-center">Por favor insira as suas credenciais para <br>se conectar.
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="step active">
+                    </p>
+                    <div class="mb-3">
+                         {{form.username|as_crispy_field}}
+                    </div>
+                    <div class="mb-3">
+                         {{form.password|as_crispy_field}}
+                    </div>
+
+                    <div class="d-flex  mb-3">
+                        <button type="submit" class="btn btn-dark custom-btn">Entrar</button>
+                    </div>
+
+                    <div class="form-group" style="text-align: center;">
+                        <a href="#" style="color: #000000;" class="ForgetPwd">recuperar palavra-passe</a>
+                    </div>
+
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div class="modal fade" id="successModal" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="color: red;"></button>
+            </div>
+            <div class="modal-body">
+                <img  src="#" alt="Top Image" class="img-fluid mx-auto d-block">
+                <p class="text-center mt-5 mb-5">Enviamos um link para o email do representate para completar o registo. </p>
+                <a href="/"  class="btn mx-auto d-block custom-btn">Página inicial</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function(){
+        $('#successModal').modal('show');
+    });
+</script>
+
+
+<script src="{% static 'bootstrap/js/popper.min.js' %}"></script>
+<script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+<script src="{% static 'bootstrap/js/jquery-3.6.0.min.js' %}"></script>
+
+</body>
+</html>
+

@@ -1,0 +1,68 @@
+{% extends "base/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+    <form action="" method="post" autocomplete="off" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="row mt-4">
+            <div class="col-md-3">
+              {{form.category|as_crispy_field}}
+            </div>
+            <div class="col-md-3">
+              {{form.subCategory|as_crispy_field}}
+            </div>
+            <div class="col-md-3">
+                {{form.name|as_crispy_field}}
+            </div>
+            <div class="col-md-3">
+              <button type="submit" class="btn btn-dark mt-4">Adicionar</button>
+            </div>
+        </div>
+    </form>
+
+
+      <div class="container mt-3 mb-3">
+        <a href="#" class="add-category-link">Adicionar nova categoria ➔</a>
+      </div>
+
+    {% if messages %}
+        <div>
+            {% for message in messages %}
+                <div class="alert alert-success">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+      <!-- Companies Table -->
+    <div class="table-responsive">
+        <table class="table">
+          <thead class="table-custom">
+          <tr>
+            <th>Categoria</th>
+            <th>Sub-categoria</th>
+            <th>Procedimento</th>
+            <th></th>
+          </tr>
+          </thead>
+          <tbody>
+           {% for procedure in procedure %}
+          <tr>
+            <td>{{procedure.category}}</td>
+            <td>{{procedure.subcategory}}</td>
+            <td>{{procedure.name}}</td>
+            <td><button class="btn btn-details"><i class="fa fa-eye"></i></button></td>
+          </tr>
+          {% endfor %}
+<!--          <tr>-->
+<!--            <td colspan="3" style="border-bottom: none;">-->
+<!--              <center>-->
+<!--                <img src="empty.svg" class="pt-5 mb-3">-->
+<!--                <p class="pb-5">Lista vazia</p>-->
+<!--              </center></td>-->
+<!--          </tr>-->
+          </tbody>
+        </table>
+      </div>
+
+
+{% endblock content %}

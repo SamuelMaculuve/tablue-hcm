@@ -1,0 +1,45 @@
+{% extends "base/base.html" %}
+{% block content %}
+
+  <div class="container search-container">
+    <div class="input-group search-input">
+      <span class="input-group-text">
+        <i class="bi bi-search"></i>
+      </span>
+      <input type="text" class="form-control" placeholder="Procurar">
+    </div>
+    <a href="{% url 'insurance_plan_create' %}" class="btn register-button">Registar Plano</a>
+  </div>
+
+{% if messages %}
+    <div>
+        {% for message in messages %}
+            <div class="alert alert-success">{{ message }}</div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<div class="table-responsive">
+        <table class="table">
+          <thead class="table-custom">
+          <tr>
+            <th>ID</th>
+            <th>Pacote</th>
+            <th>Estado</th>
+            <th>Detalhes</th>
+          </tr>
+          </thead>
+          <tbody>
+          {% for insurancePlan in plans %}
+          <tr>
+            <td>{{forloop.counter}}</td>
+            <td>{{insurancePlan.name}}</td>
+            <td><span class="badge bg-primary">Activo</span></td>
+            <td><button class="btn btn-details"><i class="fa fa-eye"></i></button></td>
+          </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+{% endblock content %}

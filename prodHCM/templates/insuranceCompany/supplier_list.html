@@ -1,0 +1,51 @@
+{% extends "base/base.html" %}
+{% block content %}
+
+  <div class="container search-container">
+    <div class="input-group search-input">
+      <span class="input-group-text">
+        <i class="bi bi-search"></i>
+      </span>
+      <input type="text" class="form-control" placeholder="Procurar">
+    </div>
+    <a href="{% url 'add_insurance_supplier' %}" class="btn register-button">Adicionar Provedor</a>
+  </div>
+
+{% if messages %}
+    <div>
+        {% for message in messages %}
+            <div class="alert alert-success">{{ message }}</div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<div class="table-responsive">
+        <table class="table">
+          <thead class="table-custom">
+          <tr>
+            <th>ID</th>
+            <th>Nome do provedor</th>
+            <th>Tipo</th>
+            <th>Contacto</th>
+            <th>Endereço</th>
+            <th>Estado</th>
+            <th>Detalhes</th>
+          </tr>
+          </thead>
+          <tbody>
+          {% for supplier in suppliers %}
+          <tr>
+            <td>{{forloop.counter}}</td>
+            <td>{{ supplier.name}}</td>
+            <td>N/A</td>
+            <td>{{ supplier.phoneNumber}}</td>
+            <td>{{ supplier.address}}</td>
+            <td><span class="badge bg-primary">Activo</span></td>
+            <td><button class="btn btn-details"><i class="fa fa-eye"></i></button></td>
+          </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+{% endblock content %}

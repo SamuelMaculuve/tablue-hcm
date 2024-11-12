@@ -1,0 +1,215 @@
+{% extends "base/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+        {% for field in form %}
+        {% if field.errors %}
+            <div class="error">
+                {% for error in field.errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endfor %}
+ <div class="container">
+     <!-- Título e etapas -->
+
+
+     <form id="multiStepForm" action="#" method="POST" enctype="multipart/form-data">
+         {% csrf_token %}
+         <div class="stepv2 active">
+             <div class="container mt-5">
+                 <div class="steps-container">
+                     <!-- Passo 1: Dados da empresa (Ativo) -->
+                     <div class="step step-active">
+                         <div class="step-number">1</div>
+                         <span>Dados da empresa</span>
+                     </div>
+                     <!-- Separador -->
+                     <div class="step step-inactive">
+                         <div class="step-number">2</div>
+                         <span>Procedimentos</span>
+                     </div>
+                 </div>
+             </div>
+
+
+             <div class="row g-4">
+                 <!-- Left Column -->
+                 <div class="col-md-6">
+                     <div class="mb-3">
+                         {{form.name|as_crispy_field}}
+                     </div>
+
+                     <div class="row">
+                         <div class="col-md-6 mb-3">
+                             {{form.nuitNumber|as_crispy_field}}
+                         </div>
+                         <div class="col-md-6 mb-3">
+                             {{form.date_of_activity_start|as_crispy_field}}
+                         </div>
+                     </div>
+
+                     <div class="file-upload mt-3">
+                         <i class="fa fa-cloud-upload-alt"></i>
+                         <span>Anexar declaração de representante legal <span class="text-danger">*</span></span>
+                     </div>
+                 </div>
+
+                 <!-- Right Column -->
+                 <div class="col-md-6">
+                     <div class="row">
+                         <div class="col-md-6 mb-3">
+                             {{form.province|as_crispy_field}}
+                         </div>
+                         <div class="col-md-6 mb-3">
+                             {{form.district|as_crispy_field}}
+                         </div>
+                     </div>
+
+                     <div class="mb-3">
+                         {{form.address|as_crispy_field}}
+                     </div>
+
+                     <div class="row">
+                         <div class="col-md-6 mb-3">
+                             {{form.email|as_crispy_field}}
+                         </div>
+                         <div class="col-md-6 mb-3">
+                             {{form.phoneNumber|as_crispy_field}}
+                         </div>
+                     </div>
+
+                     <div class="file-uploaded mt-3">
+                         <i class="fa fa-cloud-upload-alt"></i>
+                         <div>
+                             {{form.nuitFile|as_crispy_field}}
+                         </div>
+                     </div>
+                 </div>
+
+                 <div class="row">
+                     <div class="col-md-6">
+                         <div class="file-upload mt-3">
+                             <i class="fa fa-cloud-upload-alt"></i>
+                             <span>Anexar contrato de sociedade <span class="text-danger">*</span></span>
+                         </div>
+                     </div>
+                     <div class="col-md-6">
+                         <div class="file-uploaded mt-3">
+                             <i class="fa fa-cloud-upload-alt"></i>
+                             {{form.contractFile|as_crispy_field}}
+                         </div>
+                     </div>
+                 </div>
+              </div>
+
+               <div class="d-flex  mb-3">
+                     <button type="button" class="btn btn-dark custom-btn" onclick="nextStep()">Próximo</button>
+               </div>
+
+         </div>
+
+
+         <!-- Step 2: Account Details -->
+         <div class="stepv2">
+                    <div class="container mt-5">
+                      <div class="steps-container">
+                        <!-- Passo 1: Dados da empresa (Ativo) -->
+                        <div class="step step-inactive">
+                          <div class="step-number">1</div>
+                          <span>Dados da empresa</span>
+                        </div>
+                        <!-- Separador -->
+                        <div class="step step-active">
+                          <div class="step-number">2</div>
+                          <span>Procedimentos</span>
+                        </div>
+                      </div>
+                    </div>
+
+                        <div class="container">
+
+                          <div class="row">
+                            <div class="col-md-4">
+                              <select class="form-select" aria-label="Selecione a sub-categoria">
+                                <option selected>Clínica geral</option>
+                                <option value="1">Sub-categoria 1</option>
+                                <option value="2">Sub-categoria 2</option>
+                                <option value="3">Sub-categoria 3</option>
+                              </select>
+                            </div>
+                            <div class="col-md-4">
+                              <select class="form-select" aria-label="Selecione a sub-categoria">
+                                <option selected>Todos</option>
+                                <option value="1">Sub-categoria 1</option>
+                                <option value="2">Sub-categoria 2</option>
+                                <option value="3">Sub-categoria 3</option>
+                              </select>
+                            </div>
+                            <div class="col-md-4">
+                              <input class="form-control" placeholder="Procurar">
+                            </div>
+                          </div>
+                          <div class="form-container">
+
+                          <div class="mt-2 mb-2">
+                            <a href="#" class="add-category-link">Adicionar novo procedimento ➔</a>
+                          </div>
+
+                        </div>
+
+                        <div class="table-responsive">
+                          <table class="table">
+                            <thead class="table-custom">
+                            <tr>
+                              <th>ID</th>
+                              <th>Procedimento</th>
+                              <th></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {{ form.procedure }}
+                             {% for checkbox in form.procedure %}
+                                <tr>
+                                  <td>{{forloop.counter}}</td>
+                                  <td>{{ checkbox.choice_label }}</td>
+                                  <td>
+                                      <input type="checkbox" name="procedure" value="{{ procedure.value }}" {% if procedure.checked %}checked{% endif %}>
+                                  </td>
+                                </tr>
+                            {% endfor %}
+
+
+                            </tbody>
+                          </table>
+                        </div>
+
+                      </div>
+                    <div class="d-flex  mb-3">
+                        <button type="button"  class="btn btn-close-white custom-btn" style="margin-right: 20px;" onclick="prevStep()">Cancelar</button>
+                        <button type="submit" class="btn btn-dark custom-btn" >Submeter</button>
+                    </div>
+                </div>
+     </form>
+
+      </div>
+    </div>
+<script>
+    let currentStep = 0;
+    const steps = document.querySelectorAll('.stepv2');
+
+    function nextStep() {
+        steps[currentStep].classList.remove('active');
+        currentStep++;
+        steps[currentStep].classList.add('active');
+    }
+
+    function prevStep() {
+        steps[currentStep].classList.remove('active');
+        currentStep--;
+        steps[currentStep].classList.add('active');
+    }
+
+</script>
+{% endblock content %}

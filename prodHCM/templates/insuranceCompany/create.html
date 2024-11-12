@@ -1,0 +1,24 @@
+{% extends "base/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+        {% for field in form %}
+        {% if field.errors %}
+            <div class="error">
+                {% for error in field.errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endfor %}
+<form action="" method="post" autocomplete="off" enctype="multipart/form-data">
+    {% csrf_token %}
+       {{ form }}
+        <div class="d-flex justify-content-end gap-3 mt-4">
+          <button type="button" class="btn btn-cancel mr-4">Cancelar</button>
+          <button type="submit" class="btn btn-confirm">Confirmar</button>
+        </div>
+
+</form>
+
+{% endblock content %}

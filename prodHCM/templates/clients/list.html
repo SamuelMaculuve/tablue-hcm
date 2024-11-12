@@ -1,0 +1,55 @@
+{% extends "base/base.html" %}
+{% block content %}
+
+  <div class="container search-container">
+    <!-- Campo de busca com ícone -->
+    <div class="input-group search-input">
+      <span class="input-group-text">
+        <i class="bi bi-search"></i> <!-- Ícone de busca do Bootstrap Icons -->
+      </span>
+      <input type="text" class="form-control" placeholder="Procurar">
+    </div>
+
+    <!-- Botão de registro -->
+    <a href="{% url 'client_form' %}" class="btn register-button">Registar clientes</a>
+  </div>
+{% if messages %}
+    <div>
+        {% for message in messages %}
+            <div class="alert alert-success">{{ message }}</div>
+            <div class="modal fade" id="successModal" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+</div>
+            <script>
+                $(document).ready(function(){
+                    $('#successModal').modal('show');
+                });
+            </script>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<div class="table-responsive">
+        <table class="table">
+          <thead class="table-custom">
+          <tr>
+            <th>ID</th>
+            <th>Nome da empresa</th>
+            <th>Contacto</th>
+            <th>Endereço</th>
+            <th>Detalhes</th>
+          </tr>
+          </thead>
+          <tbody>
+          {% for client in clients %}
+          <tr>
+            <td>{{ client.id }}</td>
+            <td>{{client.name}}</td>
+            <td>{{client.nuitNumber}}</td>
+            <td>{{client.address}}</td>
+            <td><button class="btn btn-details"><i class="fa fa-eye"></i></button></td>
+          </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+{% endblock content %}

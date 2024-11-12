@@ -1,0 +1,101 @@
+{% extends "base/base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+
+        {% for field in form %}
+        {% if field.errors %}
+            <div class="error">
+                {% for error in field.errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endfor %}
+<form action="" method="post" autocomplete="off" enctype="multipart/form-data">
+    {% csrf_token %}
+   <div class="row g-4">
+     <div class="col-md-6">
+            <div class="mb-3">
+              <label for="tipoCliente" class="form-label">Tipo de cliente <span class="text-danger">*</span></label>
+              <select id="tipoCliente" class="form-select">
+                <option selected>Seguradora</option>
+                <!-- Other options -->
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label for="nomeEmpresa" class="form-label">Nome da empresa <span class="text-danger">*</span></label>
+              <input type="text" id="nomeEmpresa" class="form-control" placeholder="roscas seguradora">
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="nuit" class="form-label">NUIT <span class="text-danger">*</span></label>
+                <input type="text" id="nuit" class="form-control" placeholder="00000001">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="inicioAtividade" class="form-label">Início de actividade</label>
+                <input type="text" id="inicioAtividade" class="form-control" placeholder="10/03/2017">
+              </div>
+            </div>
+
+            <div class="file-upload mt-3">
+              <i class="fa fa-cloud-upload-alt"></i>
+              <span>Anexar declaração de representante legal <span class="text-danger">*</span></span>
+            </div>
+            <div class="file-upload mt-3">
+              <i class="fa fa-cloud-upload-alt"></i>
+              <span>Anexar contracto de sociedade <span class="text-danger">*</span></span>
+            </div>
+          </div>
+     <div class="col-md-6">
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="provincia" class="form-label">Província <span class="text-danger">*</span></label>
+                <select id="provincia" class="form-select">
+                  <option selected>Maputo</option>
+                  <!-- Other options -->
+                </select>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="distrito" class="form-label">Distrito <span class="text-danger">*</span></label>
+                <select id="distrito" class="form-select">
+                  <option selected>Matola</option>
+                  <!-- Other options -->
+                </select>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="endereco" class="form-label">Endereço da empresa <span class="text-danger">*</span></label>
+              <input type="text" id="endereco" class="form-control" placeholder="Av. ahmed Sekou Touré">
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
+                <input type="email" id="email" class="form-control" placeholder="tablu@tech.co.mz">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="telemovel" class="form-label">Telemóvel</label>
+                <input type="text" id="telemovel" class="form-control" placeholder="">
+              </div>
+            </div>
+
+            <div class="file-uploaded mt-3">
+              <i class="fa fa-cloud-upload-alt"></i>
+               <input class="form-label" type="file">
+            </div>
+            <div class="file-uploaded mt-3">
+              <i class="fa fa-cloud-upload-alt"></i>
+              <input class="form-label" type="file">
+            </div>
+          </div>
+   </div>
+   <div class="d-flex justify-content-end gap-3 mt-4">
+          <button type="button" class="btn btn-cancel mr-4">Cancelar</button>
+          <button type="submit" class="btn btn-confirm">Confirmar</button>
+        </div>
+</form>
+
+{% endblock content %}

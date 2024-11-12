@@ -1,0 +1,69 @@
+{% extends "base/base.html" %}
+{% block content %}
+  <div class="container search-container">
+    <!-- Campo de busca com ícone -->
+    <div class="input-group search-input">
+      <span class="input-group-text">
+        <i class="bi bi-search"></i> <!-- Ícone de busca do Bootstrap Icons -->
+      </span>
+      <input type="text" class="form-control" placeholder="Procurar">
+    </div>
+
+    <!-- Botão de registro -->
+    <a href="{% url 'procedures_form' %}" class="btn register-button">Registar Procedimento</a>
+  </div>
+
+{% if messages %}
+    <div>
+        {% for message in messages %}
+            <div class="alert alert-success">{{ message }}</div>
+            <div class="modal fade" id="successModal" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <img  src="#" alt="Top Image" class="img-fluid mx-auto d-block">
+                <p class="text-center mt-5 mb-5">Empresa registada com sucesso!</p>
+                <a href="/"  class="btn mx-auto d-block custom-btn">Terminar</a>
+            </div>
+        </div>
+    </div>
+</div>
+            <script>
+                $(document).ready(function(){
+                    $('#successModal').modal('show');
+                });
+            </script>
+        {% endfor %}
+    </div>
+{% endif %}
+
+
+<a class="btn btn-primary" data-bs-toggle="modal" href="#successModal" role="button">Open first modal</a>
+      <!-- Companies Table -->
+<div class="table-responsive">
+        <table class="table">
+          <thead class="table-custom">
+          <tr>
+            <th>ID</th>
+            <th>Nome da empresa</th>
+            <th>Tipo</th>
+            <th>Contacto</th>
+            <th>Endereço</th>
+            <th>Detalhes</th>
+          </tr>
+          </thead>
+          <tbody>
+          {% for insuranceCompany in insuranceCompany %}
+          <tr>
+            <td>{{insuranceCompany.name}}</td>
+            <td>{{insuranceCompany.fullname}}</td>
+            <td><span class="badge bg-primary">Seguradora</span></td>
+            <td>{{insuranceCompany.fullname}}</td>
+            <td>{{insuranceCompany.address}}</td>
+            <td><button class="btn btn-details"><i class="fa fa-eye"></i></button></td>
+          </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+{% endblock content %}

@@ -1,6 +1,6 @@
 {% extends "base/base.html" %}
 {% block content %}
-
+    {% include "includes/sucess_modal_dialog.html" %}
   <div class="container search-container">
     <!-- Campo de busca com ícone -->
     <div class="input-group search-input">
@@ -13,8 +13,6 @@
     <!-- Botão de registro -->
     <a href="{% url 'client_form' %}" class="btn register-button">Registar clientes</a>
   </div>
-
-    {% include "includes/sucess_modal_dialog.html" %}
 
 <div class="table-responsive">
         <table class="table">
@@ -34,7 +32,7 @@
             <td>{{client.name}}</td>
             <td>{{client.nuitNumber}}</td>
             <td>{{client.address}}</td>
-            <td><button class="btn btn-details"><i class="fa fa-eye"></i></button></td>
+            <td><a href="{% url 'client_detail' id=client.id %}" class="btn btn-details"><i class="fa fa-eye"></i></a></td>
           </tr>
           {% endfor %}
           </tbody>

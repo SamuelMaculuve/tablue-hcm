@@ -1,0 +1,89 @@
+{% extends "base/base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+<div class="container mt-5">
+    <!-- Tabs Navigation -->
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="procedimentos-tab" data-bs-toggle="tab" data-bs-target="#procedimentos" type="button" role="tab" aria-controls="procedimentos" aria-selected="true">Procedimentos</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="beneficiarios-tab" data-bs-toggle="tab" data-bs-target="#beneficiarios" type="button" role="tab" aria-controls="beneficiarios" aria-selected="false">Beneficiários</button>
+        </li>
+    </ul>
+
+    <!-- Tabs Content -->
+    <div class="tab-content" id="myTabContent">
+        <!-- Procedimentos Tab -->
+        <div class="tab-pane fade show active" id="procedimentos" role="tabpanel" aria-labelledby="procedimentos-tab">
+            <h5 class="mt-4">Lista de procedimento</h5>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Procedimento</th>
+                        <th>Preço</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>Avaliação geral</td>
+                        <td><input type="text" class="form-control text-end" value="4000" readonly></td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>Cateterismo cardíaco</td>
+                        <td><input type="text" class="form-control text-end" value="4000" readonly></td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>Dosagem de hormônios tireoidianos, exame de glicose</td>
+                        <td><input type="text" class="form-control text-end" value="4000" readonly></td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>Lista de procedimento</td>
+                        <td><input type="text" class="form-control text-end" value="4000" readonly></td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td>Teste de acuidade visual, medição da pressão intraocular</td>
+                        <td><input type="text" class="form-control text-end" value="4000" readonly></td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td>Avaliação do trato gastrointestinal, biópsia, tratamento de úlceras</td>
+                        <td><input type="text" class="form-control text-end" value="1800" readonly></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Beneficiários Tab -->
+        <div class="tab-pane fade" id="beneficiarios" role="tabpanel" aria-labelledby="beneficiarios-tab">
+            <h5 class="mt-4">Beneficiários Content Here</h5>
+            <p>Conteúdo para a aba Beneficiários.</p>
+        </div>
+    </div>
+</div>
+    <h1>Client Details</h1>
+    <p><strong>Insurance Company:</strong> {{ client.insuranceCompany }}</p>
+    <p><strong>Name:</strong> {{ client.name }}</p>
+    <p><strong>NUIT Number:</strong> {{ client.nuitNumber }}</p>
+    <p><strong>Phone Number:</strong> {{ client.phoneNumber }}</p>
+    <p><strong>Date of Activity Start:</strong> {{ client.date_of_activity_start }}</p>
+    <p><strong>Email:</strong> {{ client.email }}</p>
+    <p><strong>Address:</strong> {{ client.address }}</p>
+    <p><strong>District:</strong> {{ client.district }}</p>
+    <p><strong>Province:</strong> {{ client.province }}</p>
+
+    {% if client.contractFile %}
+        <p><strong>Contract File:</strong> <a href="{{ client.contractFile.url }}">Download</a></p>
+    {% endif %}
+
+    {% if client.nuitFile %}
+        <p><strong>NUIT File:</strong> <a href="{{ client.nuitFile.url }}">Download</a></p>
+    {% endif %}
+
+{% endblock content %}

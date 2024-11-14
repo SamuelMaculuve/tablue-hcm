@@ -97,9 +97,10 @@ class InsuranceCompany(models.Model):
 
 class InsuranceCompanyProcedure(models.Model):
     insuranceCompany = models.ForeignKey(InsuranceCompany, on_delete=models.CASCADE)
-    supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE)
-    procedure = models.ManyToManyField(Procedure, blank=True)
+    supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE,null=True, blank=True)
     negotiated_price = models.DecimalField("Preço Negociado", max_digits=10, decimal_places=2)
+    # procedure = models.ForeignKey(Procedure, on_delete=models.CASCADE,null=True, blank=True)
+
 
 class Client(models.Model):
     name = models.CharField("Nome da empresa",max_length=255)

@@ -1,0 +1,159 @@
+{% extends "base/base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+<div class="container mt-5">
+    <!-- Tabs Navigation -->
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="plano-tab" data-bs-toggle="tab" data-bs-target="#plano" type="button" role="tab" aria-controls="plano" aria-selected="true">Planos</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="beneficiarios-tab" data-bs-toggle="tab" data-bs-target="#beneficiarios" type="button" role="tab" aria-controls="beneficiarios" aria-selected="false">Beneficiários</button>
+        </li>
+    </ul>
+
+    <!-- Tabs Content -->
+    <div class="tab-content" id="myTabContent">
+        <!-- plano Tab -->
+        <div class="tab-pane fade show active" id="plano" role="tabpanel" aria-labelledby="plano-tab">
+              <div class="container search-container">
+                <!-- Campo de busca com ícone -->
+                <div class="input-group search-input">
+                  <span class="input-group-text">
+                    <i class="bi bi-search"></i> <!-- Ícone de busca do Bootstrap Icons -->
+                  </span>
+                  <input type="text" class="form-control" placeholder="Procurar">
+                </div>
+                  <a href="#" data-bs-toggle="modal" data-bs-target="#planModalModal" data-bs-whatever="@mdo" class="btn register-button">Adicionar Plano</a>
+              </div>
+
+                <div class="modal fade" id="planModalModal" tabindex="-1" aria-labelledby="planModalModalLabel" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="planModalModalLabel">Adicionar Plano</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                        <form>
+
+                         <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-primary">Send message</button>
+                         </div>
+                        </form>
+                      </div>
+
+                    </div>
+                  </div>
+                </div>
+
+            <div class="table-responsive">
+                    <table class="table">
+                      <thead class="table-custom">
+                      <tr>
+                        <th>ID</th>
+                        <th>Nome da empresa</th>
+                        <th>Contacto</th>
+                        <th>Endereço</th>
+                        <th>Detalhes</th>
+                      </tr>
+                      </thead>
+                      <tbody>
+                      {% for client in clients %}
+                      <tr>
+                        <td>{{ client.id }}</td>
+                        <td>{{client.name}}</td>
+                        <td>{{client.nuitNumber}}</td>
+                        <td>{{client.address}}</td>
+                        <td><a href="{% url 'client_detail' id=client.id %}" class="btn btn-details"><i class="fa fa-eye"></i></a></td>
+                      </tr>
+                      {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+        </div>
+
+        <!-- Beneficiários Tab -->
+        <div class="tab-pane fade" id="beneficiarios" role="tabpanel" aria-labelledby="beneficiarios-tab">
+              <div class="container search-container">
+                <!-- Campo de busca com ícone -->
+                <div class="input-group search-input">
+                  <span class="input-group-text">
+                    <i class="bi bi-search"></i> <!-- Ícone de busca do Bootstrap Icons -->
+                  </span>
+                  <input type="text" class="form-control" placeholder="Procurar">
+                </div>
+            
+                <!-- Botão de registro -->
+                <a href="#" data-bs-toggle="modal" data-bs-target="#beneficiariosModalModal" data-bs-whatever="@mdo" class="btn register-button">Adicionar</a>
+              </div>
+            
+            <div class="table-responsive">
+                    <table class="table">
+                      <thead class="table-custom">
+                      <tr>
+                        <th>ID</th>
+                        <th>Nome da empresa</th>
+                        <th>Contacto</th>
+                        <th>Endereço</th>
+                        <th>Detalhes</th>
+                      </tr>
+                      </thead>
+                      <tbody>
+                      {% for client in clients %}
+                      <tr>
+                        <td>{{ client.id }}</td>
+                        <td>{{client.name}}</td>
+                        <td>{{client.nuitNumber}}</td>
+                        <td>{{client.address}}</td>
+                        <td><a href="{% url 'client_detail' id=client.id %}" class="btn btn-details"><i class="fa fa-eye"></i></a></td>
+                      </tr>
+                      {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+            <div class="modal fade" id="beneficiariosModalModal" tabindex="-1" aria-labelledby="beneficiariosModalModalLabel" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="beneficiariosModalModalLabel">Adicionar Beneficiários</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                        <form>
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-primary">Send message</button>
+                           </div>
+                        </form>
+                      </div>
+
+                    </div>
+                  </div>
+                </div>
+
+        </div>
+    </div>
+</div>
+<!--    <h1>Client Details</h1>-->
+<!--    <p><strong>Insurance Company:</strong> {{ client.insuranceCompany }}</p>-->
+<!--    <p><strong>Name:</strong> {{ client.name }}</p>-->
+<!--    <p><strong>NUIT Number:</strong> {{ client.nuitNumber }}</p>-->
+<!--    <p><strong>Phone Number:</strong> {{ client.phoneNumber }}</p>-->
+<!--    <p><strong>Date of Activity Start:</strong> {{ client.date_of_activity_start }}</p>-->
+<!--    <p><strong>Email:</strong> {{ client.email }}</p>-->
+<!--    <p><strong>Address:</strong> {{ client.address }}</p>-->
+<!--    <p><strong>District:</strong> {{ client.district }}</p>-->
+<!--    <p><strong>Province:</strong> {{ client.province }}</p>-->
+
+<!--    {% if client.contractFile %}-->
+<!--        <p><strong>Contract File:</strong> <a href="{{ client.contractFile.url }}">Download</a></p>-->
+<!--    {% endif %}-->
+
+<!--    {% if client.nuitFile %}-->
+<!--        <p><strong>NUIT File:</strong> <a href="{{ client.nuitFile.url }}">Download</a></p>-->
+<!--    {% endif %}-->
+
+{% endblock content %}

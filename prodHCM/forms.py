@@ -1,8 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm
-from prodHCM.models import InsuranceCompany, Procedure, Category, Client, Supplier, InsurancePlan, \
-    InsuranceCompanyProcedure
-
+from prodHCM.models import InsuranceCompany, Procedure, Category, Client, Supplier, InsurancePlan
 
 class CustomLoginForm(AuthenticationForm):
     # Customizing the AuthenticationForm
@@ -62,16 +60,6 @@ class AddSupplierToInsuranceFrom(forms.Form):
         widget = forms.CheckboxSelectMultiple,
         label=''
     )
-
-class InsuranceCompanyProcedureFrom(forms.ModelForm):
-    class Meta:
-        model = InsuranceCompanyProcedure
-        fields = ('procedure','negotiated_price')
-        procedure = forms.ModelMultipleChoiceField(
-            queryset=Procedure.objects.all(),
-            widget=forms.CheckboxSelectMultiple,
-            label=''
-        )
 
 class ProceduresFrom(forms.ModelForm):
     class Meta:

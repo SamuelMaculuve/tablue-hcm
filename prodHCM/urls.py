@@ -25,6 +25,7 @@ urlpatterns = [
     #clients
     path('client/create/', views.client_form, name='client_form'),
     path('client/list/', views.client_list, name='client_list'),
+    path('client/<int:id>/', views.client_detail, name='client_detail'),
 
     #supplier
     path('supplier/create/', views.supplier_form, name='supplier_form'),

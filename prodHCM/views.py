@@ -1,8 +1,8 @@
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from .forms import CustomLoginForm, InsuranceCompanyFrom, ProceduresFrom, ClientsForm, SupplierForm, \
-    AddSupplierToInsuranceFrom, InsuranceCompanyProcedureFrom, InsurancePlanForm
+    AddSupplierToInsuranceFrom, InsurancePlanForm
 from .models import InsuranceCompany, Procedure, Client, Supplier, InsurancePlan
 from django.contrib.auth.decorators import login_required
 
@@ -156,27 +156,27 @@ def add_insurance_supplier(request):
 def add_insurance_supplier_procedure(request):
 
     insuranceCompany = getattr(request.user, 'insuranceCompany', None)
+    form = "null";
+    # try:
+    #     company = InsuranceCompany.objects.get(id=insuranceCompany.id, user=request.user)
+    # except InsuranceCompany.DoesNotExist:
+    #     return redirect('/dashboard/insurance/supplier/list/')
+    #
+    # if request.method == 'POST':
+    #     form = InsuranceCompanyProcedureFrom(request.POST)
+    #     if form.is_valid():
+    #         # plan = request.POST['supplier']
+    #         # company.supplier.add(plan)
+    #         context = {
+    #             'title': 'Criar novo Clientes',
+    #             'form': form
+    #         }
+    #         messages.success(request, 'Plano com sucesso!')
+    #         return redirect('/dashboard/insurance/list', context)
+    # else:
+    #     form = InsuranceCompanyProcedureFrom()
 
-    try:
-        company = InsuranceCompany.objects.get(id=insuranceCompany.id, user=request.user)
-    except InsuranceCompany.DoesNotExist:
-        return redirect('/dashboard/insurance/supplier/list/')
-
-    if request.method == 'POST':
-        form = InsuranceCompanyProcedureFrom(request.POST)
-        if form.is_valid():
-            # plan = request.POST['supplier']
-            # company.supplier.add(plan)
-            context = {
-                'title': 'Criar novo Clientes',
-                'form': form
-            }
-            messages.success(request, 'Plano com sucesso!')
-            return redirect('/dashboard/insurance/list', context)
-    else:
-        form = InsuranceCompanyProcedureFrom()
-
-    return render(request, 'insuranceCompany/add_existing_supplier_procedure.html', {'form': form, 'company': company})
+    return render(request, 'insuranceCompany/add_existing_supplier_procedure.html', {'form': form})
 
 def insurance_list(request):
     context = {
@@ -300,6 +300,18 @@ def client_form(request, id=0):
             return redirect('/dashboard/client/list/', context)
         else:
             return render(request, 'clients/create.html', {'form': form})
+
+@login_required
+def client_detail(request, id):
+
+    client = get_object_or_404(Client, id=id)
+
+    context = {
+        'title': client.name,
+        'client' : client
+    }
+
+    return render(request, 'clients/show.html', context)
 
 def supplier_list(request):
 

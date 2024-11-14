@@ -4,9 +4,10 @@ from .views import procedures_form
 
 urlpatterns = [
 
-    path('', views.dashboard),
+    path('', views.dashboard,name='dashboard'),
 
     path('login/', views.custom_login, name='custom_login'),
+    path('logout/', views.custom_logout, name='custom_logout'),
 
     # insurance
     path('insurance/create/', views.insurance_form, name='insurance_form'),
@@ -14,7 +15,7 @@ urlpatterns = [
     path('insurance/plan/list/', views.insurance_plan_list, name='insurance_plan_list'),
     path('insurance/plan/add_plan/', views.insurance_plan_create, name='insurance_plan_create'),
     path('insurance/supplier/list/', views.insurance_supplier_list, name='insurance_supplier_list'),
-    path('insurance/supplier/add_plan/', views.add_insurance_supplier, name='add_insurance_supplier'),
+    path('insurance/supplier/create/', views.add_insurance_supplier, name='add_insurance_supplier'),
     path('insurance/supplier/procedure/', views.add_insurance_supplier_procedure, name='add_insurance_supplier_procedure'),
 
     # procedures
@@ -28,4 +29,6 @@ urlpatterns = [
     #supplier
     path('supplier/create/', views.supplier_form, name='supplier_form'),
     path('supplier/list/', views.supplier_list, name='supplier_list'),
+    path('supplier/client/list/', views.supplier_client_list, name='supplier_client_list'),
+
 ]

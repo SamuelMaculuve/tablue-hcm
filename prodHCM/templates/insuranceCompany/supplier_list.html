@@ -8,16 +8,44 @@
       </span>
       <input type="text" class="form-control" placeholder="Procurar">
     </div>
-    <a href="{% url 'add_insurance_supplier' %}" class="btn register-button">Adicionar Provedor</a>
+    <a href="#" class="btn register-button" data-bs-toggle="modal" data-bs-target="#addInsuranceModal">Adicionar Provedor</a>
+<!--    <a href="{% url 'add_insurance_supplier' %}" class="btn register-button">Adicionar Provedor</a>x-->
   </div>
 
-{% if messages %}
-    <div>
-        {% for message in messages %}
-            <div class="alert alert-success">{{ message }}</div>
-        {% endfor %}
+  <!-- Modal -->
+  <div class="modal fade" id="addInsuranceModal" tabindex="-1" aria-labelledby="addInsuranceModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <h3 style="font-weight: 400;font-size: 25px;">Lista dos provedores</h3>
+          <div class="mb-3">
+             <input class="form-control" placeholder="pesquisar">
+          </div>
+         <form  method="post" autocomplete="off" enctype="multipart/form-data">
+              {% csrf_token %}
+                {{ form.as_p }}
+                {% if form.errors %}
+                    <div class="alert alert-danger">
+                        {% for field, errors in form.errors.items %}
+                            <strong>{{ field }}:</strong> {{ errors|join:", " }}<br>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+             <button type="submit">Adicionar</button>
+        </form>
+        </div>
+      </div>
     </div>
-{% endif %}
+  </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            {% include "includes/sucess_modal_dialog.html" %}
+       {% endfor %}
+    {% endif %}
 
 <div class="table-responsive">
         <table class="table">

@@ -10,15 +10,7 @@
     </div>
     <a href="{% url 'insurance_plan_create' %}" class="btn register-button">Registar Plano</a>
   </div>
-
-{% if messages %}
-    <div>
-        {% for message in messages %}
-            <div class="alert alert-success">{{ message }}</div>
-        {% endfor %}
-    </div>
-{% endif %}
-
+    {% include "includes/sucess_modal_dialog.html" %}
 <div class="table-responsive">
         <table class="table">
           <thead class="table-custom">
@@ -30,11 +22,12 @@
           </tr>
           </thead>
           <tbody>
+
           {% for insurancePlan in plans %}
           <tr>
             <td>{{forloop.counter}}</td>
             <td>{{insurancePlan.name}}</td>
-            <td><span class="badge bg-primary">Activo</span></td>
+            <td><span class="badge bg-primary">{{ insurancePlan.status }}</span></td>
             <td><button class="btn btn-details"><i class="fa fa-eye"></i></button></td>
           </tr>
           {% endfor %}

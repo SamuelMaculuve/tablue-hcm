@@ -9,24 +9,8 @@
       </span>
       <input type="text" class="form-control" placeholder="Procurar">
     </div>
-
-    <!-- Botão de registro -->
     <a href="{% url 'supplier_form' %}" class="btn register-button">Registar Provedor</a>
   </div>
-{% if messages %}
-    <div>
-        {% for message in messages %}
-            <div class="alert alert-success">{{ message }}</div>
-            <div class="modal fade" id="successModal" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
-</div>
-            <script>
-                $(document).ready(function(){
-                    $('#successModal').modal('show');
-                });
-            </script>
-        {% endfor %}
-    </div>
-{% endif %}
 
 <div class="table-responsive">
         <table class="table">

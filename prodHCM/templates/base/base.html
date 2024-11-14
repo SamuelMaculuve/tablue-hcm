@@ -147,6 +147,22 @@
     .table>:not(caption)>*>* {
       font-weight: 400;
     }
+    button.btn.btn-details {
+      background: #373737;
+      color: #fff;
+    }
+    i.fa.fa-check.me-2.fa-sucess {
+      background: #080808;
+      padding: 10px;
+      border-radius: 50%;
+      color: #fff;
+      font-size: 18pt;
+    }
+    button.btn.btn-secondary.sucess-btn {
+      background: #fff;
+      color: #080808;
+      border: 1px solid #D9D9D9;
+    }
   </style>
   <style>
     .form-section h5 {
@@ -368,7 +384,6 @@ input[type=file]::file-selector-button {
       padding: 20px;
     }
   </style>
-
   <style>
     .profile-card {
       display: flex;
@@ -406,7 +421,22 @@ input[type=file]::file-selector-button {
     #div_id_nuitFile .form-control {
       padding: 0 !important;
     }
-
+    .form-check {
+      display: block;
+      min-height: 1.5rem;
+      padding-left: 1.5em;
+      margin-bottom: .125rem;
+      border: 1px solid #dee2e6;
+    }
+    #div_id_procedure .form-section .form-label {
+      font-size: 16px;
+      font-weight: 500;
+      color: #495057;
+    }
+    .provider-list {
+        /*background: #F0EDED;*/
+        /*padding: 10px;*/
+    }
   </style>
 </head>
 <body>
@@ -414,13 +444,16 @@ input[type=file]::file-selector-button {
   <div class="d-flex col-12 col-md-3 col-lg-2 mb-2 mb-lg-0 flex-wrap flex-md-nowrap justify-content-center">
     <a class="navbar-brand d-block text-center" href="#">
       {% if user.groups.all.0.name == "Admin" %}
-          <img src="https://afrikarealestate.com/storage/logo_1@4x%201.png" class="img-fluid" alt="Logo">
+          <img src="{% static 'img/logo.png' %}" class="img-fluid" alt="Logo">
       {% elif user.groups.all.0.name == "InsuranceCompany" %}
-          <img src="https://afrikarealestate.com/storage/logo2.png" class="img-fluid" alt="Logo">
+          <img src="{% static 'img/logoSeguradora.png' %}" class="img-fluid" alt="Logo">
+      {% elif user.groups.all.0.name == "Supplier" %}
+          <img src="{% static 'img/logoProvedor.png' %}" class="img-fluid" alt="Logo">
+      {% elif user.groups.all.0.name == "client" %}
+          <img src="{% static 'img/logoCliente.png' %}" class="img-fluid" alt="Logo">
       {% else %}
           Welcome, User!
       {% endif %}
-
     </a>
     <button class="navbar-toggler d-md-none collapsed mb-3" type="button" data-toggle="collapse" data-target="#sidebar" aria-controls="sidebar" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
@@ -436,8 +469,8 @@ input[type=file]::file-selector-button {
       <div class="profile-card">
         <img src="https://via.placeholder.com/50" alt="Profile Avatar" class="profile-avatar">
         <div class="profile-info">
-          <div class="name">John Doe</div>
-          <div class="email">{{ user.username }}</div>
+          <div class="name">{{ user.username }}</div>
+          <div class="email">activo</div>
         </div>
         <!-- Dropdown toggle button -->
         <div class="dropdown">
@@ -446,7 +479,7 @@ input[type=file]::file-selector-button {
           </button>
           <!-- Dropdown menu -->
           <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
-            <li><a class="dropdown-item" href="#">Logout</a></li>
+            <li><a class="dropdown-item" href="{% url 'custom_logout' %}">Logout</a></li>
           </ul>
         </div>
       </div>
@@ -462,30 +495,51 @@ input[type=file]::file-selector-button {
       <div class="position-sticky">
         <!-- Menu -->
         <div class="section-title  pt-5">Menu</div>
-        <a href="#" class="nav-link active d-flex align-items-center px-3 py-2">
+        <a href="{% url 'dashboard' %}" class="nav-link {% if request.path == '/dashboard' %} active{% endif %}" d-flex align-items-center px-3 py-2">
           <i class="fas fa-chart-bar"></i> Dashboard
         </a>
-        <a href="{% url 'client_list' %}" class="nav-link d-flex align-items-center px-3 py-2">
-          <i class="fas fa-users"></i> Clientes
-        </a>
 
-        <!-- Seguros -->
-        <div class="section-title mt-3">Seguros</div>
-        <a href="{% url 'supplier_list' %}" class="nav-link d-flex align-items-center px-3 py-2">
-          <i class="fas fa-building"></i> Provedores
-        </a>
-        <a href="{% url 'procedures_list' %}" class="nav-link d-flex align-items-center px-3 py-2">
-          <i class="fas fa-briefcase-medical"></i> Procedimentos
-        </a>
+        {% if user.groups.all.0.name == "Admin" %}
+          <a href="{% url 'insurance_list' %}" class="nav-link {% if request.path == '/dashboard/insurance/list/' %} active{% endif %} d-flex align-items-center px-3 py-2">
+            <i class="fas fa-users"></i> Clientes
+          </a>
+          <!-- Seguros -->
+          <div class="section-title mt-3">Seguros</div>
+          <a href="{% url 'supplier_list' %}" class="nav-link {% if request.path == '/dashboard/supplier/list/' %} active{% endif %} d-flex align-items-center px-3 py-2">
+            <i class="fas fa-building"></i> Provedores
+          </a>
+          <a href="{% url 'procedures_list' %}" class="nav-link {% if request.path == '/dashboard/procedure/list/' %} active{% endif %} d-flex align-items-center px-3 py-2">
+            <i class="fas fa-briefcase-medical"></i> Procedimentos
+          </a>
+        {% endif %}
 
+        {% if user.groups.all.0.name == "InsuranceCompany" %}
+          <div class="section-title mt-3">Seguros</div>
+            <a href="{% url 'client_list' %}" class="nav-link {% if request.path == '/dashboard/client/list/' %} active{% endif %} d-flex align-items-center px-3 py-2">
+              <i class="fas fa-users"></i> Clientes
+            </a>
 
-        <a href="{% url 'insurance_plan_list' %}" class="nav-link d-flex align-items-center px-3 py-2">
-          <i class="fas fa-briefcase-medical"></i> Planos
-        </a>
+            <a href="{% url 'insurance_plan_list' %}" class="nav-link {% if request.path == '/dashboard/insurance/plan/list/' %} active{% endif %} d-flex align-items-center px-3 py-2">
+              <i class="fas fa-briefcase-medical"></i> Planos
+            </a>
 
-        <a href="{% url 'insurance_supplier_list' %}" class="nav-link d-flex align-items-center px-3 py-2">
-          <i class="fas fa-briefcase-medical"></i> Provedores
-        </a>
+            <a href="{% url 'insurance_supplier_list' %}" class="nav-link {% if request.path == '/dashboard/insurance/supplier/list/' %} active{% endif %} d-flex align-items-center px-3 py-2">
+              <i class="fas fa-briefcase-medical"></i> Provedores
+            </a>
+        {% endif %}
+
+        {% if user.groups.all.0.name == "Supplier" %}
+
+          <div class="section-title mt-3">Seguros</div>
+            <a href="{% url 'supplier_client_list' %}" class="nav-link {% if request.path == '/dashboard/supplier/client/list/' %} active{% endif %} d-flex align-items-center px-3 py-2">
+              <i class="fas fa-users"></i> Clientes
+            </a>
+
+            <a href="{% url 'insurance_plan_list' %}" class="nav-link {% if request.path == '/dashboard/insurance/plan/list/' %} active{% endif %} d-flex align-items-center px-3 py-2">
+              <i class="fas fa-briefcase-medical"></i> Procedimentos
+            </a>
+
+        {% endif %}
 
         <!-- Outros -->
         <div class="section-title mt-3">Outros</div>

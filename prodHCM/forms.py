@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm
-from prodHCM.models import InsuranceCompany, Procedure, Category, Client, Supplier, InsurancePlan
+from prodHCM.models import InsuranceCompany, Procedure, Category, Client, Supplier, InsurancePlan, \
+    InsuranceCompanyProcedure
 
 
 class CustomLoginForm(AuthenticationForm):
@@ -38,31 +39,39 @@ class InsuranceCompanyFrom(forms.ModelForm):
         super(InsuranceCompanyFrom,self).__init__(*args, **kwargs)
         self.fields['insuranceCompanyType'].empty_label = "Select"
 
-class InsurancePlanForm(forms.Form):
+class InsurancePlanForm(forms.ModelForm):
     class Meta:
         model = InsurancePlan
-        fields = '__all__'
-        # fields = ('name','status','procedure')
-
+        fields =  '__all__'
+        # fields = ('name','status')
+        # labels = {
+        #     'name' : 'Nome',
+        #     'status' : 'Estado',
+        #     'insuranceCompany' : 'insuranceCompany',
+        #     'procedure' : 'procedure',
+        # }
+    procedure = forms.ModelMultipleChoiceField(
+        queryset = Procedure.objects.all(),
+        widget = forms.CheckboxSelectMultiple,
+        label='Lista de procedimento'
+    )
 
 class AddSupplierToInsuranceFrom(forms.Form):
     supplier = forms.ModelMultipleChoiceField(
         queryset = Supplier.objects.all(),
         widget = forms.CheckboxSelectMultiple,
-        label='Select Insurance Plans'
+        label=''
     )
 
-class InsuranceCompanyProcedureFrom(forms.Form):
-    supplier = forms.ModelMultipleChoiceField(
-        queryset = Supplier.objects.all(),
-        widget = forms.CheckboxSelectMultiple,
-        label='Select Insurance Plans'
-    )
-    procedure = forms.ModelMultipleChoiceField(
-        queryset = Procedure.objects.all(),
-        widget = forms.CheckboxSelectMultiple,
-        label='Select Insurance Procedimento'
-    )
+class InsuranceCompanyProcedureFrom(forms.ModelForm):
+    class Meta:
+        model = InsuranceCompanyProcedure
+        fields = ('procedure','negotiated_price')
+        procedure = forms.ModelMultipleChoiceField(
+            queryset=Procedure.objects.all(),
+            widget=forms.CheckboxSelectMultiple,
+            label=''
+        )
 
 class ProceduresFrom(forms.ModelForm):
     class Meta:
@@ -81,12 +90,12 @@ class ProceduresFrom(forms.ModelForm):
 class ClientsForm(forms.ModelForm):
         class Meta:
             model = Client
-            fields = ('name','nuitNumber','phoneNumber','date_of_activity_start','email','address','district','province','contractFile','nuitFile')
+            fields = ('insuranceCompany','name','nuitNumber','phoneNumber','date_of_activity_start','email','address','district','province','contractFile','nuitFile')
             # fields = '__all__'
             widgets = {
+                'insuranceCompany': forms.HiddenInput(),
                 'date_of_activity_start': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             }
-
 
 class SupplierForm(forms.ModelForm):
     class Meta:

@@ -279,7 +279,10 @@
             <div class="text-center mt-5 mb-5">
                 <img  class="icon_dashboard img-fluid" src="https://afrikarealestate.com/storage/logo_1@4x%201.png" alt="Logo">
             </div>
-                <p class="text-center">Por favor insira as suas credenciais para <br>se conectar.
+            <p class="text-center">Por favor insira as suas credenciais para <br>se conectar.</p>
+                {% if error %}
+                    <p style="color: red;">{{ error }}</p> <!-- Display the error message in red -->
+                {% endif %}
             <form method="post" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="step active">

@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 import datetime
 from django.contrib.auth.models import User
+from django.contrib.auth.models import Group
 
 class Category(models.Model):
     name = models.CharField("Nome", max_length=255)
@@ -34,8 +35,8 @@ class Supplier(models.Model):
     address = models.CharField("Endereço",max_length=100)
     district = models.CharField("Distrito",max_length=100)
     province = models.CharField("Provincia",max_length=100)
-    contractFile = models.FileField(upload_to='SupplierContracts/')
-    nuitFile = models.FileField(upload_to='SupplierNuits/')
+    contractFile = models.FileField(upload_to='static/img/supplierContracts/')
+    nuitFile = models.FileField(upload_to='static/img/supplierNuits/')
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True, related_name='supplier')
     # procedure = models.ManyToManyField(Procedure, blank=True)
 
@@ -45,11 +46,11 @@ class Supplier(models.Model):
                 username=self.name.lower().replace(" ", "_"),
                 password="password"
             )
+
             self.user = new_user
 
-            # group_name = 'Supplier'
-            # group = Group.objects.get(name=group_name)
-            # new_user.groups.add(group)
+            group = Group.objects.get(name="Supplier")
+            self.user.groups.add(group)
 
         super().save(*args, **kwargs)
 
@@ -71,11 +72,11 @@ class InsuranceCompany(models.Model):
     address = models.CharField("Endereço",max_length=100)
     district = models.CharField("Distrito",max_length=100)
     province = models.CharField("Provincia",max_length=100)
-    contractFile = models.FileField(upload_to='InsuranceCompanyContracts/')
-    nuitFile = models.FileField(upload_to='InsuranceCompanyNuits/')
+    contractFile = models.FileField(upload_to='static/img/insuranceCompanyContracts/')
+    nuitFile = models.FileField(upload_to='static/img/insuranceCompanyNuits/')
     insuranceCompanyType = models.ForeignKey(InsuranceCompanyType, on_delete=models.CASCADE)
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True, related_name='insuranceCompany')
-    supplier = models.ManyToManyField(Supplier, blank=True)
+    supplier = models.ManyToManyField(Supplier, blank=True,related_name='insuranceCompany')
 
     def save(self, *args, **kwargs):
         if not self.user:
@@ -83,11 +84,11 @@ class InsuranceCompany(models.Model):
                 username=self.name.lower().replace(" ", "_"),
                 password="password"
             )
+
             self.user = new_user
 
-            # group_name = 'InsuranceCompany'
-            # group = Group.objects.get(name=group_name)
-            # new_user.groups.add(group)
+            group = Group.objects.get(name="InsuranceCompany")
+            self.user.groups.add(group)
 
         super().save(*args, **kwargs)
 
@@ -100,7 +101,6 @@ class InsuranceCompanyProcedure(models.Model):
     procedure = models.ManyToManyField(Procedure, blank=True)
     negotiated_price = models.DecimalField("Preço Negociado", max_digits=10, decimal_places=2)
 
-
 class Client(models.Model):
     name = models.CharField("Nome da empresa",max_length=255)
     nuitNumber = models.CharField("NUIT",max_length=15)
@@ -110,24 +110,28 @@ class Client(models.Model):
     address = models.CharField("Endereço",max_length=100)
     district = models.CharField("Distrito",max_length=100)
     province = models.CharField("Provincia",max_length=100)
-    contractFile = models.FileField(upload_to='clients/')
-    nuitFile = models.FileField(upload_to='clients/')
+    contractFile = models.FileField(upload_to='static/img/clients/')
+    nuitFile = models.FileField(upload_to='static/img/clients/')
     insuranceCompany = models.ForeignKey(InsuranceCompany, on_delete=models.CASCADE,null=True, blank=True)
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True, related_name='client')
 
     def save(self, *args, **kwargs):
+
+        # insuranceCompany = InsuranceCompany.objects.get(id=6)
+
         if not self.user:
             new_user = User.objects.create_user(
                 username=self.name.lower().replace(" ", "_"),
                 password="password"
             )
+
             self.user = new_user
 
-            # group_name = 'client'
-            # group = Group.objects.get(name=group_name)
-            # new_user.groups.add(group)
+            group = Group.objects.get(name="client")
+            self.user.groups.add(group)
 
         super().save(*args, **kwargs)
+
 
     def __str__(self):
         return self.name
@@ -143,8 +147,6 @@ class InsurancePlan(models.Model):
     insuranceCompany = models.ForeignKey(InsuranceCompany, on_delete=models.CASCADE, null=True, blank=True)
     procedure = models.ManyToManyField(Procedure, blank=True)
 
-    def __str__(self):
-        return self.name
 
 class Beneficiaries(models.Model):
     name = models.CharField("Nome da empresa",max_length=255)
@@ -159,4 +161,7 @@ class Beneficiaries(models.Model):
     insuranceCompany = models.ForeignKey(InsuranceCompany, on_delete=models.CASCADE, null=True, blank=True)
     insurancePlan = models.ForeignKey(InsurancePlan, on_delete=models.CASCADE)
 
-    
+
+
+
+

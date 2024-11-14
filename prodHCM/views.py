@@ -1,5 +1,5 @@
 from django.contrib import messages
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect
 from .forms import CustomLoginForm, InsuranceCompanyFrom, ProceduresFrom, ClientsForm, SupplierForm, \
     AddSupplierToInsuranceFrom, InsuranceCompanyProcedureFrom, InsurancePlanForm
@@ -7,107 +7,61 @@ from .models import InsuranceCompany, Procedure, Client, Supplier, InsurancePlan
 from django.contrib.auth.decorators import login_required
 
 def custom_login(request):
-    form = CustomLoginForm(request.POST)
-
+    form = CustomLoginForm(request.POST or None)
     context = {
         'title': 'Criar novo Clientes',
-        'client': Client.objects.all()
+        'form': form,
     }
 
     if request.method == "POST":
-
-        username = request.POST['username']
-        password = request.POST['password']
+        username = request.POST.get('username')
+        password = request.POST.get('password')
 
         user = authenticate(request, username=username, password=password)
 
         if user is not None:
             login(request, user)
-            return redirect('/dashboard/client/list', context)
+            return redirect('/dashboard')
         else:
-            return render(request, 'auth/login.html', {'error': 'Invalid credentials.'})
+            # Update context with an error message
+            context['error'] = 'Credenciais inválidas.'  # 'Invalid credentials.'
 
-    return render(request, 'auth/login.html', {'form': form})
+    return render(request, 'auth/login.html', context)
+
+def custom_logout(request):
+    logout(request)
+    return redirect('custom_login')
 
 @login_required
 def dashboard(request):
+    if request.user.is_authenticated:
+        insuranceCompany = getattr(request.user, 'insuranceCompany', None)
 
-    insuranceCompany = getattr(request.user, 'insuranceCompany', None)
-
-    context = {
-        'title': 'Dashboard',
-        'nome_empresa': insuranceCompany.id,
-    }
-
-    return render(request, 'dashboard.html',context)
-
-def custom_login2(request):
-    form = CustomLoginForm(request.POST or None)
-    if request.method == "POST" and form.is_valid():
-        form = CustomLoginForm(request.POST)  # Instantiate the form with POST data
-
-        if form.is_valid():  # Ensure form is valid before accessing cleaned_data
-            # Access cleaned data (only available if the form is valid)
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password')
-
-            # Authenticate the user
-            user = authenticate(request, username=username, password=password)
-
-            if user is not None:
-                # Log the user in and redirect
-                login(request, user)
-                return redirect('home')  # Replace with your target URL
-            else:
-                # Authentication failed
-                form.add_error(None, 'Invalid username or password')
-        else:
-            # If the form is invalid, you can display errors
-            form.add_error(None, 'Please correct the errors below')
+        context = {
+            'title': 'Dashboard',
+            'nome_empresa': insuranceCompany,
+        }
+        return render(request, 'dashboard.html', context)
     else:
-        form = CustomLoginForm()  # Instantiate an empty form for GET requests
-
-    return render(request, 'auth/login.html', {'form': form})
+        return redirect('custom_login')
 
 def insurance_plan_list(request):
 
     insuranceCompany = getattr(request.user, 'insuranceCompany', None)
-    # insurancePlan = InsurancePlan.objects.get()
+
+    insurancePlan = InsurancePlan.objects.all().order_by('-id')
+    # insurancePlan = InsurancePlan.objects.filter(insuranceCompany__id=4)
+    # plans = InsurancePlan.objects.filter(insuranceCompany__name="Company Name")
+
     context = {
         'title': 'Plano',
-        'plans' : InsurancePlan.objects.all()
+        'plans' : insurancePlan,
+        'insuranceCompany' : insuranceCompany
     }
 
     return render(request, "insuranceCompany/plan_list.html",context)
 
 @login_required
-def insurance_plan_create3(request):
-
-    insuranceCompany = getattr(request.user, 'insuranceCompany', None)
-
-    try:
-        company = InsuranceCompany.objects.get(id=insuranceCompany.id, user=request.user)
-    except InsuranceCompany.DoesNotExist:
-        return redirect('/dashboard/insurance/plan/list')  # Redirect if no such company exists for the user
-
-    if request.method == 'POST':
-        form = InsurancePlan(request.POST)
-        if form.is_valid():
-            # plan = form.cleaned_data['insurancePlan']
-            # plan = request.POST['insurancePlan']
-            # company.insurancePlan.add(plan)
-
-            context = {
-                'title': 'Criar novo Clientes',
-                'form': form
-            }
-            form.save()
-            messages.success(request, 'Plano com sucesso!')
-            return redirect('/dashboard/insurance/list', context)
-    else:
-        form = InsurancePlanForm()
-
-    return render(request, 'insuranceCompany/add_existing_plan.html', {'form': form, 'company': company})
 def insurance_plan_create(request, id=0):
 
     insuranceCompany = getattr(request.user, 'insuranceCompany', None)
@@ -120,40 +74,58 @@ def insurance_plan_create(request, id=0):
             form = InsurancePlanForm(instance = insurancePlan)
 
         context = {
-            'title': 'Criar novo plano',
-            'form': form
+            'title': 'Criar Plano',
+            'form': form,
+            'insuranceCompany': insuranceCompany,
         }
 
         return render(request, "insuranceCompany/add_existing_plan.html",context)
     else:
         form = InsurancePlanForm(request.POST, request.FILES)
         context = {
-            'title': 'Criar novo Plano',
-            'insuranceCompany': InsurancePlan.objects.all()
+            'title': 'Planos',
+            'plans': InsurancePlan.objects.all()
         }
-
-        # form.insuranceCompany_id  = insuranceCompany.id
-
         if form.is_valid():
             form.save()
-            messages.success(request, 'Plano criado com sucesso!')
-            return render(request, "/dashboard/insurance/supplier/list/", context)
+            return redirect('/dashboard/insurance/plan/list/',context)
         else:
+
             return render(request, 'insuranceCompany/add_existing_plan.html', {'form': form})
 
 def insurance_supplier_list(request):
 
     insuranceCompany = getattr(request.user, 'insuranceCompany', None)
 
-    company = InsuranceCompany.objects.get(id=insuranceCompany.id)
-    suppliers = company.supplier.all()
+    try:
+        company = InsuranceCompany.objects.get(id=insuranceCompany.id, user=request.user)
+    except InsuranceCompany.DoesNotExist:
+        return redirect('/dashboard')
 
-    context = {
-        'title': 'Meus Provedores',
-        'suppliers' : suppliers
-    }
+    if request.method == 'POST':
+        form = AddSupplierToInsuranceFrom(request.POST)
+        if form.is_valid():
+            plan = request.POST['supplier']
+            company.supplier.add(plan)
+            context = {
+                'title': 'Criar novo Clientes',
+                'form': form
+            }
+            messages.success(request, 'Plano com sucesso!')
+            return redirect('/dashboard/insurance/supplier/procedure/', context)
+    else:
+        form = AddSupplierToInsuranceFrom()
 
-    return render(request, "insuranceCompany/supplier_list.html",context)
+        company = InsuranceCompany.objects.get(id=insuranceCompany.id)
+        suppliers = company.supplier.all()
+
+        context = {
+            'title': 'Meus Provedores',
+            'suppliers': suppliers,
+            'form': form
+        }
+        return render(request, 'insuranceCompany/supplier_list.html', context)
+
 @login_required
 def add_insurance_supplier(request):
 
@@ -174,11 +146,12 @@ def add_insurance_supplier(request):
                 'form': form
             }
             messages.success(request, 'Plano com sucesso!')
-            return redirect('/dashboard/insurance/list', context)
+            return redirect('/dashboard/insurance/supplier/procedure/', context)
     else:
         form = AddSupplierToInsuranceFrom()
 
     return render(request, 'insuranceCompany/add_existing_supplier.html', {'form': form, 'company': company})
+
 @login_required
 def add_insurance_supplier_procedure(request):
 
@@ -208,7 +181,7 @@ def add_insurance_supplier_procedure(request):
 def insurance_list(request):
     context = {
         'title': 'Clientes',
-        'insuranceCompany' : InsuranceCompany.objects.all()
+        'insuranceCompany' : InsuranceCompany.objects.all().order_by('-id')
     }
     return render(request, "insuranceCompany/list.html",context)
 
@@ -229,19 +202,19 @@ def insurance_form(request, id=0):
         form = InsuranceCompanyFrom(request.POST, request.FILES)
         context = {
             'title': 'Criar novo Clientes',
-            'insuranceCompany': InsuranceCompany.objects.all()
+            'insuranceCompany': InsuranceCompany.objects.all().order_by('-id')
         }
         if form.is_valid():
             form.save()
             messages.success(request, 'Cliente criado com sucesso!')
-            return render(request, "/dashboard/insurance/list/", context)
+            return redirect('/dashboard/insurance/list/', context)
         else:
             return render(request, 'insuranceCompany/create.html', {'form': form})
 
 def procedures_list(request):
     context = {
         'title': 'Procedimentos',
-        'procedure' : Procedure.objects.all()
+        'procedures' : Procedure.objects.all()
     }
     return render(request, "procedures/list.html",context)
 
@@ -284,10 +257,14 @@ def procedures_form(request, id=0):
             return render(request, 'procedures/create.html', {'form': form})
 
 def client_list(request):
+
+    insuranceCompany = getattr(request.user, 'insuranceCompany', None)
+
     context = {
         'title': 'Clientes',
-        'clients' : Client.objects.all()
+        'clients' : Client.objects.filter(insuranceCompany__id=insuranceCompany.id)
     }
+
     return render(request, "clients/list.html",context)
 
 def client_form(request, id=0):
@@ -296,14 +273,15 @@ def client_form(request, id=0):
 
     if request.method == "GET":
         if id == 0 :
-            form = ClientsForm()
+            form = ClientsForm(initial={'insuranceCompany': insuranceCompany})
         else:
             client = Client.objects.get(pk=id)
             form = ClientsForm(instance = client)
 
         context = {
             'title': 'Criar novo Clientes',
-            'form': form
+            'form': form,
+            'insuranceCompany': insuranceCompany,
         }
         return render(request, "clients/create.html",context)
 
@@ -313,24 +291,36 @@ def client_form(request, id=0):
 
         context = {
             'title': 'Criar novo Clientes',
-            'client': Client.objects.all()
+            'client': Client.objects.filter(insuranceCompany__id=insuranceCompany.id)
         }
 
         if form.is_valid():
-            client_saved = form.save(commit=False)
-            client_saved.insuranceCompany = insuranceCompany
-            client_saved.save()
+            form.save()
             messages.success(request, 'Cliente criado com sucesso!')
             return redirect('/dashboard/client/list/', context)
         else:
             return render(request, 'clients/create.html', {'form': form})
 
 def supplier_list(request):
+
     context = {
         'title': 'Provedor',
         'suppliers' : Supplier.objects.all()
     }
     return render(request, "supplier/list.html",context)
+
+def supplier_client_list(request):
+
+    supplier = getattr(request.user, 'supplier', None)
+
+    insuranceCompanys = supplier.insuranceCompany.all()
+
+    context = {
+        'title': 'Clientes',
+        'insuranceCompanys' : insuranceCompanys
+    }
+
+    return render(request, "supplier/client_list.html",context)
 
 def supplier_form(request, id=0):
     if request.method == "GET":
@@ -338,7 +328,7 @@ def supplier_form(request, id=0):
             form = SupplierForm()
         else:
             supplier = Supplier.objects.get(pk=id)
-            form = SupplierForm(instance = client)
+            form = SupplierForm(instance = supplier)
 
         context = {
             'title': 'Provedor',

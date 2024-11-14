@@ -12,29 +12,11 @@
     <a href="{% url 'insurance_form' %}" class="btn register-button">Registar cliente</a>
   </div>
 
-{% if messages %}
-    <div>
+    {% if messages %}
         {% for message in messages %}
-            <div class="alert alert-success">{{ message }}</div>
-            <div class="modal fade" id="successModal" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-body">
-                <img  src="#" alt="Top Image" class="img-fluid mx-auto d-block">
-                <p class="text-center mt-5 mb-5">Empresa registada com sucesso!</p>
-                <a href="/"  class="btn mx-auto d-block custom-btn">Terminar</a>
-            </div>
-        </div>
-    </div>
-</div>
-            <script>
-                $(document).ready(function(){
-                    $('#successModal').modal('show');
-                });
-            </script>
-        {% endfor %}
-    </div>
-{% endif %}
+            {% include "includes/sucess_modal_dialog.html" %}
+       {% endfor %}
+    {% endif %}
 
     <div class="table-responsive">
         <table class="table">
@@ -51,7 +33,7 @@
           <tbody>
           {% for insuranceCompany in insuranceCompany %}
           <tr>
-            <td>{{forloop.counter}}</td>
+            <td>{{insuranceCompany.id}}</td>
             <td>{{insuranceCompany.name}}</td>
             <td><span class="badge bg-primary">{{ insuranceCompanyType }}</span></td>
             <td>{{insuranceCompany.phoneNumber}}</td>

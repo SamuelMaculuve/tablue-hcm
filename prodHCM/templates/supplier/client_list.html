@@ -1,7 +1,7 @@
 {% extends "base/base.html" %}
 {% block content %}
 
-  <div class="container search-container">
+<div class="container search-container">
     <!-- Campo de busca com ícone -->
     <div class="input-group search-input">
       <span class="input-group-text">
@@ -11,10 +11,16 @@
     </div>
 
     <!-- Botão de registro -->
-    <a href="{% url 'client_form' %}" class="btn register-button">Registar clientes</a>
+    <a href="{% url 'supplier_form' %}" class="btn register-button">Registar Provedor</a>
   </div>
-
-    {% include "includes/sucess_modal_dialog.html" %}
+{% if messages %}
+    <div>
+        {% for message in messages %}
+            <div class="alert alert-success">{{ message }}</div>
+            <div class="modal fade" id="successModal" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true"></div>
+        {% endfor %}
+    </div>
+{% endif %}
 
 <div class="table-responsive">
         <table class="table">
@@ -28,12 +34,12 @@
           </tr>
           </thead>
           <tbody>
-          {% for client in clients %}
+          {% for insuranceCompany in insuranceCompanys %}
           <tr>
-            <td>{{ client.id }}</td>
-            <td>{{client.name}}</td>
-            <td>{{client.nuitNumber}}</td>
-            <td>{{client.address}}</td>
+            <td>{{insuranceCompany.id}}</td>
+            <td>{{ insuranceCompany.name}}</td>
+            <td>{{ insuranceCompany.phoneNumber}}</td>
+            <td>{{ insuranceCompany.address}}</td>
             <td><button class="btn btn-details"><i class="fa fa-eye"></i></button></td>
           </tr>
           {% endfor %}

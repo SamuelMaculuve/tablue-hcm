@@ -99,8 +99,13 @@ class InsuranceCompanyProcedure(models.Model):
     insuranceCompany = models.ForeignKey(InsuranceCompany, on_delete=models.CASCADE)
     supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE,null=True, blank=True)
     negotiated_price = models.DecimalField("Preço Negociado", max_digits=10, decimal_places=2)
-    # procedure = models.ForeignKey(Procedure, on_delete=models.CASCADE,null=True, blank=True)
+    procedure = models.ForeignKey(Procedure, on_delete=models.CASCADE,null=True, blank=True)
 
+    class Meta:
+        unique_together = ('insuranceCompany', 'supplier', 'procedure')
+
+    def __str__(self):
+        return f"{self.insuranceCompany} - {self.supplier} - {self.procedure} - {self.negotiated_price}"
 
 class Client(models.Model):
     name = models.CharField("Nome da empresa",max_length=255)

@@ -1,75 +1,16 @@
 {% extends "base/base.html" %}
 {% block content %}
 
-      <div class="container mb-4 mt-3">
-        <div class="date-selector rounded-pill">
-          Jan 1 - Jan 20, 2024 - {{ nome_empresa }}
-          <i class="fas fa-chevron-down"></i>
-        </div>
-      </div>
-      <!-- Summary Cards -->
-      <div class="row g-4">
-        <!-- Card 1 -->
-        <div class="col-md-4">
-          <div class="card-custom card-custom-cor-1">
-            <div class="options-icon  pt-3">
-              <i class="fa fa-ellipsis-v"></i>
-            </div>
-            <p class="pt-3">Provedores</p>
-            <h1 class="pt-3">27</h1>
-            <p>Último mês <span class="percentage-change  pt-3">-1%</span></p>
-          </div>
-        </div>
-        <!-- Card 2 -->
-        <div class="col-md-4">
-          <div class="card-custom card-custom-cor-2">
-            <div class="options-icon pt-3">
-              <i class="fa fa-ellipsis-v"></i>
-            </div>
-            <p class="pt-3">Seguradoras</p>
-            <h1 class="pt-3">12</h1>
-            <p>Último mês <span class="percentage-change text-success pt-3">+7%</span></p>
-          </div>
-        </div>
-        <!-- Card 3 -->
-        <div class="col-md-4">
-          <div class="card-custom card-custom-cor-3">
-            <div class="options-icon  pt-3">
-              <i class="fa fa-ellipsis-v"></i>
-            </div>
-            <p class="pt-3">Corporativos</p>
-            <h1 class="pt-3">7</h1>
-            <p>Último mês <span class="percentage-change pt-3">-</span></p>
-          </div>
-        </div>
-      </div>
-
-      <h2 class="pt-4 pb-4">Lista de empresas</h2>
-      <!-- Companies Table -->
-      <div class="table-responsive">
-        <table class="table">
-          <thead class="table-custom">
-          <tr>
-            <th>ID</th>
-            <th>Nome da empresa</th>
-            <th>Tipo</th>
-            <th>Contacto</th>
-            <th>Endereço</th>
-            <th>Detalhes</th>
-          </tr>
-          </thead>
-          <tbody>
-          <tr>
-            <td>001</td>
-            <td>EIKO</td>
-            <td><span class="badge bg-primary">Seguradora</span></td>
-            <td>84 140 1000</td>
-            <td>Bairro leão, Malhampsene</td>
-            <td><button class="btn btn-details"><i class="fa fa-eye"></i></button></td>
-          </tr>
-          <!-- Repeat for other entries as needed -->
-          </tbody>
-        </table>
-      </div>
+      {% if user.groups.all.0.name == "Admin" %}
+          <img src="{% static 'img/logo.png' %}" class="img-fluid" alt="Logo">
+      {% elif user.groups.all.0.name == "InsuranceCompany" %}
+          <img src="{% static 'img/logoSeguradora.png' %}" class="img-fluid" alt="Logo">
+      {% elif user.groups.all.0.name == "Supplier" %}
+          <img src="{% static 'img/logoProvedor.png' %}" class="img-fluid" alt="Logo">
+      {% elif user.groups.all.0.name == "client" %}
+          <img src="{% static 'img/logoCliente.png' %}" class="img-fluid" alt="Logo">
+      {% else %}
+          Welcome, User!
+      {% endif %}
 
 {% endblock content %}

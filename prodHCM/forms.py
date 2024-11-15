@@ -1,6 +1,10 @@
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm
-from prodHCM.models import InsuranceCompany, Procedure, Category, Client, Supplier, InsurancePlan
+from django.forms import modelformset_factory
+
+from prodHCM.models import InsuranceCompany, Procedure, Category, Client, Supplier, InsurancePlan, \
+    InsuranceCompanyProcedure
+
 
 class CustomLoginForm(AuthenticationForm):
     # Customizing the AuthenticationForm
@@ -53,6 +57,52 @@ class InsurancePlanForm(forms.ModelForm):
         widget = forms.CheckboxSelectMultiple,
         label='Lista de procedimento'
     )
+
+class InsuranceCompanyProcedureForm(forms.ModelForm):
+    class Meta:
+        model = InsuranceCompanyProcedure
+        fields = ['procedure', 'negotiated_price']
+        widgets = {
+            'negotiated_price': forms.NumberInput(attrs={'placeholder': 'Preço Negociado'}),
+            'procedure': forms.CheckboxInput(),
+        }
+
+# Crie o formset para gerenciar múltiplas instâncias
+InsuranceCompanyProcedureFormSet = modelformset_factory(
+    InsuranceCompanyProcedure,
+    form=InsuranceCompanyProcedureForm,
+    extra=0  # Ajuste conforme necessário para campos adicionais em branco
+)
+# class InsuranceCompanyProcedureForm(forms.ModelForm):
+#     class Meta:
+#         model = InsuranceCompanyProcedure
+#         fields = ('insuranceCompany','supplier','negotiated_price','procedure')
+#         # widgets = {
+#         #             'insuranceCompany': forms.HiddenInput(),
+#         #             'supplier': forms.HiddenInput(),
+#         #             'procedure': forms.CheckboxInput(),
+#         #         }
+#
+# class ProcedureSelectionForm(forms.Form):
+#     def __init__(self, *args, **kwargs):
+#         procedures = kwargs.pop('procedures', [])
+#         super().__init__(*args, **kwargs)
+#
+#         for procedure in procedures:
+#             # Checkbox para selecionar o procedimento
+#             self.fields[f"procedure_{procedure.id}"] = forms.BooleanField(
+#                 required=False,
+#                 label="",
+#                 widget=forms.CheckboxInput(attrs={'class': 'checkbox-class'})
+#             )
+#             # Campo de preço associado ao procedimento
+#             self.fields[f"price_{procedure.id}"] = forms.DecimalField(
+#                 required=False,
+#                 max_digits=10,
+#                 decimal_places=2,
+#                 label="",
+#                 widget=forms.NumberInput(attrs={'class': 'price-input-class', 'placeholder': 'Preço'})
+#             )
 
 class AddSupplierToInsuranceFrom(forms.Form):
     supplier = forms.ModelMultipleChoiceField(

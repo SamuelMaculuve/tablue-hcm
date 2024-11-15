@@ -1,10 +1,91 @@
-{% extends "base/base.html" %}
-{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selecionar e Salvar Procedimentos</title>
+    <script>
+        // Função JavaScript para capturar os IDs dos checkboxes selecionados e o preço negociado
+        document.addEventListener("DOMContentLoaded", function () {
+            document.getElementById("save-button").addEventListener("click", function (event) {
+                event.preventDefault(); // Impede o envio padrão do formulário
 
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Add Plano</button>
-</form>
+                // Coletar os IDs dos checkboxes marcados e os preços negociados
+                const selectedProcedures = Array.from(
+                    document.querySelectorAll(".procedure-checkbox:checked")
+                ).map(checkbox => {
+                    const row = checkbox.closest('tr');
+                    const negotiatedPrice = row.querySelector(".negotiated-price").value; // Captura o preço negociado
+                    return {
+                        procedure_id: checkbox.value,
+                        negotiated_price: negotiatedPrice
+                    };
+                });
 
-{% endblock content %}
+                if (selectedProcedures.length === 0) {
+                    alert("Selecione pelo menos um procedimento.");
+                    return;
+                }
+
+                // Fazer a requisição AJAX
+                fetch("{% url 'save_procedures' %}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": "{{ csrf_token }}"
+                    },
+                    body: JSON.stringify({
+                        procedures: selectedProcedures,
+                        insurance_company_id: document.getElementById("insurance-company-id").value
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert("Procedimentos salvos com sucesso!");
+                    } else {
+                        alert(data.error || "Erro ao salvar procedimentos.");
+                    }
+                })
+                .catch(error => console.error("Erro na requisição:", error));
+            });
+        });
+    </script>
+</head>
+<body>
+    <form id="procedure-form">
+        {% csrf_token %}
+
+        <!-- Campo para o ID da companhia de seguro -->
+        <input type="hidden" id="insurance-company-id" value="{{ insurance_company.id }}">
+
+        <table class="procedure-table" border="1">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Procedimento</th>
+                    <th>Selecionar</th>
+                    <th>Preço</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for procedure in procedures %}
+                    <tr>
+                        <td>{{ procedure.id }}</td>
+                        <td>{{ procedure.name }}</td>
+                        <td>
+                            <input type="checkbox" class="procedure-checkbox" value="{{ procedure.id }}">
+                        </td>
+                        <td>
+                            <input type="text" class="negotiated-price" value="4000"> <!-- Preço negociado editável -->
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Botão para salvar -->
+        <button type="button" id="save-button">Salvar</button>
+    </form>
+</body>
+</html>

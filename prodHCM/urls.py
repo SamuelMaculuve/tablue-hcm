@@ -31,5 +31,6 @@ urlpatterns = [
     path('supplier/create/', views.supplier_form, name='supplier_form'),
     path('supplier/list/', views.supplier_list, name='supplier_list'),
     path('supplier/client/list/', views.supplier_client_list, name='supplier_client_list'),
+    path('save-procedures/', views.save_procedures, name='save_procedures'),
 
 ]

@@ -16,7 +16,7 @@ urlpatterns = [
     path('insurance/plan/add_plan/', views.insurance_plan_create, name='insurance_plan_create'),
     path('insurance/supplier/list/', views.insurance_supplier_list, name='insurance_supplier_list'),
     path('insurance/supplier/create/', views.add_insurance_supplier, name='add_insurance_supplier'),
-    path('insurance/supplier/procedure/', views.add_insurance_supplier_procedure, name='add_insurance_supplier_procedure'),
+    path('insurance/supplier/procedure/<int:id>/', views.add_insurance_supplier_procedure, name='add_insurance_supplier_procedure'),
 
     # procedures
     path('procedure/create/', views.procedures_form, name='procedures_form'),
@@ -31,6 +31,7 @@ urlpatterns = [
     path('supplier/create/', views.supplier_form, name='supplier_form'),
     path('supplier/list/', views.supplier_list, name='supplier_list'),
     path('supplier/client/list/', views.supplier_client_list, name='supplier_client_list'),
+    path('supplier/client/show/<int:id>/', views.supplier_client_show, name='supplier_client_show'),
     path('save-procedures/', views.save_procedures, name='save_procedures'),
 
 ]

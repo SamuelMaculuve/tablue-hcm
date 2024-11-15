@@ -1,0 +1,86 @@
+{% extends "base/base.html" %}
+{% block content %}
+
+<div class="container mt-5">
+    <!-- Tabs Navigation -->
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="procedure-tab" data-bs-toggle="tab" data-bs-target="#procedure" type="button" role="tab" aria-controls="procedure" aria-selected="true">Procedimentos</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="beneficiarios-tab" data-bs-toggle="tab" data-bs-target="#beneficiarios" type="button" role="tab" aria-controls="beneficiarios" aria-selected="false">Beneficiários</button>
+        </li>
+    </ul>
+
+    <!-- Tabs Content -->
+    <div class="tab-content" id="myTabContent">
+        <!-- procedure Tab -->
+        <div class="tab-pane fade show active" id="procedure" role="tabpanel" aria-labelledby="procedure-tab">
+            <div class="table-responsive mt-4">
+                <form id="procedure-form">
+                    <!-- Campo para o ID da companhia de seguro -->
+                    <input type="hidden" id="insurance-company-id" value="{{ insurance_company.id }}">
+                    <input type="hidden" id="supplier-id" value="{{ supplier.id }}">
+
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Procedimento</th>
+                                <th>Preço</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for insuranceCompanyProcedure in saved_procedures %}
+                                <tr>
+                                    <td>{{ insuranceCompanyProcedure.id }}</td>
+                                    <td>{{ insuranceCompanyProcedure.procedure }}</td>
+                                    <td>
+                                        <input type="text" disabled class="negotiated-price form-control" value="{{ insuranceCompanyProcedure.negotiated_price }}">
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                </form>
+            </div>
+        </div>
+
+        <!-- Beneficiários Tab -->
+        <div class="tab-pane fade" id="beneficiarios" role="tabpanel" aria-labelledby="beneficiarios-tab">
+              <div class="container search-container">
+                <!-- Campo de busca com ícone -->
+                <div class="input-group search-input">
+                  <span class="input-group-text">
+                    <i class="bi bi-search"></i>
+                  </span>
+                  <input type="text" class="form-control" placeholder="Procurar">
+                </div>
+
+                <!-- Botão de registro -->
+                <a href="#" data-bs-toggle="modal" data-bs-target="#beneficiariosModalModal" data-bs-whatever="@mdo" class="btn register-button">Adicionar</a>
+              </div>
+
+            <div class="table-responsive">
+                    <table class="table">
+                      <thead class="table-custom">
+                      <tr>
+                        <th>ID</th>
+                        <th>Nome da empresa</th>
+                        <th>Contacto</th>
+                        <th>Endereço</th>
+                        <th>Detalhes</th>
+                      </tr>
+                      </thead>
+                      <tbody>
+
+                      </tbody>
+                    </table>
+             </div>
+
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

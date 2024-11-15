@@ -1,5 +1,4 @@
 import json
-
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect, get_object_or_404
@@ -102,8 +101,7 @@ def insurance_plan_create(request, id=0):
 def insurance_supplier_list(request):
 
     insuranceCompany = getattr(request.user, 'insuranceCompany', None)
-    company = InsuranceCompany.objects.get(id=insuranceCompany.id)
-    suppliers = company.supplier.all()
+
     try:
         company = InsuranceCompany.objects.get(id=insuranceCompany.id, user=request.user)
     except InsuranceCompany.DoesNotExist:
@@ -115,21 +113,22 @@ def insurance_supplier_list(request):
             plan = request.POST['supplier']
             company.supplier.add(plan)
             context = {
-                'title': 'Meus Provedores',
-                'suppliers': suppliers,
+                'title': 'Criar novo Clientes',
                 'form': form
             }
             messages.success(request, 'Plano com sucesso!')
-            return redirect('/dashboard/insurance/supplier/list/', context)
+            return redirect('/dashboard/insurance/supplier/procedure/', context)
     else:
         form = AddSupplierToInsuranceFrom()
+
+        company = InsuranceCompany.objects.get(id=insuranceCompany.id)
+        suppliers = company.supplier.all()
 
         context = {
             'title': 'Meus Provedores',
             'suppliers': suppliers,
             'form': form
         }
-
         return render(request, 'insuranceCompany/supplier_list.html', context)
 
 @login_required
@@ -142,92 +141,227 @@ def add_insurance_supplier(request):
     except InsuranceCompany.DoesNotExist:
         return redirect('/dashboard/insurance/supplier/list/')
 
-    print(request.method)
-
     if request.method == 'POST':
         form = AddSupplierToInsuranceFrom(request.POST)
-        print(form.is_valid())
-        plan = request.POST['supplier']
-        print(plan)
-        company.supplier.add(plan)
-        context = {
-            'title': 'Adicionar provedores',
-            'form': form
-        }
-        messages.success(request, 'Plano com sucesso!')
-        return redirect('/dashboard/insurance/supplier/procedure/', context)
-        # if form.is_valid():
-
+        if form.is_valid():
+            plan = request.POST['supplier']
+            company.supplier.add(plan)
+            context = {
+                'title': 'Criar novo Clientes',
+                'form': form
+            }
+            messages.success(request, 'Plano com sucesso!')
+            return redirect('/dashboard/insurance/supplier/procedure/', context)
     else:
-
         form = AddSupplierToInsuranceFrom()
 
     return render(request, 'insuranceCompany/add_existing_supplier.html', {'form': form, 'company': company})
 
 @login_required
-def add_insurance_supplier_procedure(request,id):
+def add_insurance_supplier_procedure1(request):
 
-    insurance_company = getattr(request.user, 'insuranceCompany', None)
-    supplier = Supplier.objects.get(id=id)
+    insuranceCompany = getattr(request.user, 'insuranceCompany', None)
+
+    try:
+        company = InsuranceCompany.objects.get(id=insuranceCompany.id, user=request.user)
+    except InsuranceCompany.DoesNotExist:
+        return redirect('/dashboard/insurance/supplier/list/')
 
     if request.method == 'POST':
-        formset = InsuranceCompanyProcedureFormSet(request.POST, queryset=InsuranceCompanyProcedure.objects.filter(insuranceCompany=insurance_company,supplier=supplier))
-        if formset.is_valid():
-            formset.save()
-            return redirect('/dashboard/insurance/supplier/list/')
+        form = InsuranceCompanyProcedureForm(request.POST)
+        if form.is_valid():
+            # plan = request.POST['supplier']
+            # company.supplier.add(plan)
+            context = {
+                'title': 'Criar novo Clientes ----',
+                'form': form
+            }
+            messages.success(request, 'Plano com sucesso!')
+            return redirect('/dashboard/insurance/list', context)
     else:
-        formset = InsuranceCompanyProcedureFormSet(queryset=InsuranceCompanyProcedure.objects.filter(insuranceCompany=insurance_company,supplier=supplier))
 
-        saved_procedures = InsuranceCompanyProcedure.objects.filter(insuranceCompany=insurance_company,supplier=supplier)
-        saved_procedures_ids = saved_procedures.values_list('procedure_id',flat=True)  # Lista de IDs dos procedimentos salvos
+        # form = InsuranceCompanyProcedureForm()
+        formset = InsuranceCompanyProcedureForm()
 
         context = {
-            'title': 'Procedimentos',
-            'supplier': supplier,
-            'insuranceCompany': InsuranceCompany.objects.all().order_by('-id'),
-            'procedures': Procedure.objects.all(),
-            'saved_procedures': saved_procedures,  # Procedimentos já salvos
-            'saved_procedures_ids': saved_procedures_ids,  # Procedimentos já salvos
+            'title': 'Criar novo Clientes ----',
+            'form': formset
         }
 
     return render(request, 'insuranceCompany/add_existing_supplier_procedure.html', context)
 
-@csrf_exempt  # Desativar o CSRF apenas se necessário para AJAX; idealmente, configure o CSRF no frontend
+# def add_insurance_supplier_procedure(request):
+#     insuranceCompany = getattr(request.user, 'insuranceCompany', None)
+#     procedures = Procedure.objects.all()
+#
+#     if request.method == "POST":
+#         form = ProcedureSelectionForm(request.POST, procedures=procedures)
+#         if form.is_valid():
+#             for procedure in procedures:
+#                 selected = form.cleaned_data.get(f"procedure_{procedure.id}")
+#                 price = form.cleaned_data.get(f"price_{procedure.id}")
+#
+#                 if selected and price is not None:
+#                     InsuranceCompanyProcedure.objects.update_or_create(
+#                         insurance_company=insuranceCompany,
+#                         procedure=procedure,
+#                         defaults={'negotiated_price': price}
+#                     )
+#                 else:
+#                     InsuranceCompanyProcedure.objects.filter(
+#                         insurance_company=insuranceCompany,
+#                         procedure=procedure
+#                     ).delete()
+#             return redirect('/dashboard/insurance/list')
+#     else:
+#         form = ProcedureSelectionForm(procedures=procedures)
+#
+#     return render(request, 'insuranceCompany/add_existing_supplier_procedure.html', {'form': form, 'procedures': procedures})
+
+def add_insurance_supplier_procedure22(request):
+
+    insurance_company = getattr(request.user, 'insuranceCompany', None)
+
+    # Inicializar o formset com procedimentos para a companhia de seguros específica
+    if request.method == 'POST':
+        formset = InsuranceCompanyProcedureFormSet(request.POST, queryset=InsuranceCompanyProcedure.objects.filter(insuranceCompany=insurance_company))
+        if formset.is_valid():
+            formset.save()
+            return redirect('success_url')  # Redirecione para uma página de sucesso
+    else:
+        formset = InsuranceCompanyProcedureFormSet(queryset=InsuranceCompanyProcedure.objects.filter(insuranceCompany=insurance_company))
+        context = {
+            'title': 'Clientes',
+            'insuranceCompany': InsuranceCompany.objects.all().order_by('-id'),
+            'procedures': Procedure.objects.all()
+        }
+    return render(request, 'insuranceCompany/add_existing_supplier_procedure.html', context)
+def add_insurance_supplier_procedure(request):
+    insurance_company = getattr(request.user, 'insuranceCompany', None)
+
+    # Inicializar o formset com procedimentos para a companhia de seguros específica
+    if request.method == 'POST':
+        formset = InsuranceCompanyProcedureFormSet(request.POST, queryset=InsuranceCompanyProcedure.objects.filter(insuranceCompany=insurance_company))
+        if formset.is_valid():
+            formset.save()
+            return redirect('success_url')  # Redirecione para uma página de sucesso
+    else:
+        formset = InsuranceCompanyProcedureFormSet(queryset=InsuranceCompanyProcedure.objects.filter(insuranceCompany=insurance_company))
+
+        # Obtém todos os procedimentos
+        procedures = Procedure.objects.all()
+
+        # Obtém todos os procedimentos já salvos para a companhia de seguros
+        saved_procedures = InsuranceCompanyProcedure.objects.filter(insuranceCompany=insurance_company)
+        saved_procedures_ids = saved_procedures.values_list('procedure_id',flat=True)  # Lista de IDs dos procedimentos salvos
+
+        # Passa as informações para o template
+        context = {
+            'title': 'Clientes',
+            'insuranceCompany': InsuranceCompany.objects.all().order_by('-id'),
+            'procedures': procedures,
+            'saved_procedures': saved_procedures,  # Procedimentos já salvos
+            'saved_procedures_ids': saved_procedures_ids,  # Procedimentos já salvos
+            'formset': formset
+        }
+
+    return render(request, 'insuranceCompany/add_existing_supplier_procedure.html', context)
+
+
+@csrf_exempt
 def save_procedures(request):
     if request.method == "POST":
         try:
+            # Carregar os dados enviados no corpo da requisição
             data = json.loads(request.body)
             procedures_data = data.get("procedures", [])
-            supplier_id = data.get("supplier_id")
+            remove_procedures = data.get("remove_procedures", [])
+            insurance_company = getattr(request.user, 'insuranceCompany', None)
+            insurance_company_id =insurance_company.id
+            if not procedures_data and not remove_procedures:
+                return JsonResponse({"success": False, "error": "Nenhum procedimento selecionado ou desmarcado."})
 
-            insurance_company_id = getattr(request.user, 'insuranceCompany', None)
+            # Remover procedimentos desmarcados
+            for procedure_id in remove_procedures:
+                try:
+                    # Verifica e remove os procedimentos desmarcados
+                    insurance_procedure = InsuranceCompanyProcedure.objects.get(
+                        insuranceCompany_id=insurance_company_id,
+                        procedure_id=procedure_id
+                    )
+                    insurance_procedure.delete()  # Remove da base de dados
+                except InsuranceCompanyProcedure.DoesNotExist:
+                    continue  # Se o procedimento não for encontrado, continuar
 
-            if not procedures_data:
-                return JsonResponse({"success": False, "error": "Nenhum procedimento selecionado."})
-
-            # Loop para salvar cada procedimento selecionado com o preço negociado
+            # Adicionar ou atualizar os procedimentos selecionados
             for procedure_data in procedures_data:
                 procedure_id = procedure_data.get("procedure_id")
                 negotiated_price = procedure_data.get("negotiated_price")
 
                 try:
                     procedure = Procedure.objects.get(id=procedure_id)
-                    # Cria o registro de InsuranceCompanyProcedure
-                    InsuranceCompanyProcedure.objects.create(
-                        insuranceCompany_id=insurance_company_id.id,
-                        procedure=procedure,
-                        supplier_id=supplier_id,
-                        negotiated_price=negotiated_price
-                    )
-                except Procedure.DoesNotExist:
-                    return JsonResponse({"success": False, "error": f"Procedimento {procedure_id} não encontrado."})
 
-            return JsonResponse({"success": True, "message": "Procedimentos salvos com sucesso!"})
+                    # Verifica se o procedimento já existe na base de dados
+                    insurance_procedure, created = InsuranceCompanyProcedure.objects.update_or_create(
+                        insuranceCompany_id=insurance_company_id,
+                        procedure=procedure,
+                        defaults={'negotiated_price': negotiated_price}  # Atualiza o preço negociado
+                    )
+
+                    # A variável 'created' indica se o registro foi criado ou atualizado
+                    if created:
+                        print(f"Procedimento {procedure_id} criado.")
+                    else:
+                        print(f"Procedimento {procedure_id} atualizado.")
+
+                except Procedure.DoesNotExist:
+                    continue  # Se o procedimento não for encontrado, continuar
+
+            return JsonResponse({"success": True, "message": "Procedimentos salvos ou removidos com sucesso!"})
 
         except json.JSONDecodeError as e:
             return JsonResponse({"success": False, "error": "Erro ao processar os dados."})
 
     return JsonResponse({"success": False, "error": "Método não permitido."})
+
+
+# @csrf_exempt
+# def save_procedures(request):
+#     if request.method == "POST":
+#
+#         procedures_data = request.POST.getlist('procedure_ids')
+#         insurance_company_id = getattr(request.user, 'insuranceCompany', None)
+#         # insurance_company = getattr(request.user, 'insuranceCompany', None)
+#         for procedure_id in procedures_data:
+#             procedure = Procedure.objects.get(id=procedure_id)
+#             InsuranceCompanyProcedure.objects.create(
+#                 insuranceCompany_id=insurance_company_id,
+#                 procedure=procedure,
+#                 negotiated_price=4000  # ou calcule conforme necessário
+#             )
+#         return JsonResponse({"success": True})
+#     return JsonResponse({"success": False, "error": "Método não permitido"})
+
+# def save_procedures(request):
+#     if request.method == 'POST':
+#         data = json.loads(request.body)
+#         procedures = data.get('procedures', [])
+#
+#         for item in procedures:
+#             procedure_id = item['procedure_id']
+#             price = item['price']
+#
+#             # Substitua `None` por valores reais para `insuranceCompany` e `supplier` se necessário
+#             InsuranceCompanyProcedure.objects.create(
+#                 insuranceCompany=None,  # Exemplo
+#                 supplier=None,  # Exemplo
+#                 negotiated_price=price,
+#                 procedure_id=procedure_id
+#             )
+#
+#         return JsonResponse({'success': True})
+#     return JsonResponse({'success': False})
+
 
 def insurance_list(request):
     context = {
@@ -415,24 +549,3 @@ def supplier_form(request, id=0):
 
         else:
             return render(request, 'supplier/create.html', {'form': form})
-def supplier_client_show(request,id):
-
-    supplier = getattr(request.user, 'supplier', None)
-
-    insurance_company = InsuranceCompany.objects.get(pk=id)
-
-    saved_procedures = InsuranceCompanyProcedure.objects.filter(insuranceCompany=insurance_company,supplier=supplier)
-    saved_procedures_ids = saved_procedures.values_list('procedure_id',flat=True)  # Lista de IDs dos procedimentos salvos
-
-    context = {
-            'title': insurance_company.name,
-            'supplier': supplier,
-            'insuranceCompany': InsuranceCompany.objects.all().order_by('-id'),
-            'procedures': Procedure.objects.all(),
-            'saved_procedures': saved_procedures,
-            'insurance_company': insurance_company,
-     }
-
-    return render(request, 'supplier/client_show.html', context)
-
-

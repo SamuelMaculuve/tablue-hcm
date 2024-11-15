@@ -1,10 +1,85 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Selecionar e Salvar Procedimentos</title>
-    <script>
+{% extends "base/base.html" %}
+{% block content %}
+<div class="container">
+      <div class="form-section">
+        <!-- Título e etapas -->
+
+        <div class="container mt-5">
+          <div class="steps-container">
+            <!-- Passo 1: Dados da empresa (Ativo) -->
+            <div class="step step-inactive">
+              <div class="step-number">1</div>
+              <span>Dados da empresa</span>
+            </div>
+            <!-- Separador -->
+            <div class="step step-active">
+              <div class="step-number">2</div>
+              <span>Procedimentos</span>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-4">
+            <input class="form-control" placeholder="{{ supplier.name }}" disabled="">
+          </div>
+<!--          <div class="col-md-4">-->
+<!--            <select class="form-select" aria-label="Selecione a sub-categoria">-->
+<!--              <option selected="">Todos</option>-->
+<!--              <option value="1">Sub-categoria 1</option>-->
+<!--              <option value="2">Sub-categoria 2</option>-->
+<!--              <option value="3">Sub-categoria 3</option>-->
+<!--            </select>-->
+<!--          </div>-->
+<!--          <div class="col-md-4">-->
+<!--            <input class="form-control" placeholder="Procurar">-->
+<!--          </div>-->
+        </div>
+        <p class="mt-2 mb-2" style="font-weight: 400;">Lista de procedimento
+        </p>
+      <div class="table-responsive mt-4">
+    <form id="procedure-form">
+        {% csrf_token %}
+        <!-- Campo para o ID da companhia de seguro -->
+        <input type="hidden" id="insurance-company-id" value="{{ insurance_company.id }}">
+        <input type="hidden" id="supplier-id" value="{{ supplier.id }}">
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Procedimento</th>
+                    <th>Selecionar</th>
+                    <th>Preço</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for procedure in procedures %}
+                    <tr>
+                        <td>{{ procedure.id }}</td>
+                        <td>{{ procedure.name }}</td>
+                        <td>
+                            <input type="checkbox" class="procedure-checkbox"
+                                   {% if procedure.id in saved_procedures_ids %}
+                                        checked
+                                   {% endif %}
+                                   value="{{ procedure.id }}">
+                        </td>
+                        <td>
+                            <input type="text" class="negotiated-price form-control" value="{% if procedure.id in saved_procedures_ids %}{{ procedure.negotiated_price }}{% else %}0{% endif %}"> <!-- Preço negociado editável -->
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Botão para salvar -->
+        <button type="button" id="save-button" class="btn">Salvar</button>
+    </form>
+</div>
+      </div>
+    </div>
+
+<script>
         // Função JavaScript para capturar os IDs dos checkboxes selecionados e o preço negociado
         document.addEventListener("DOMContentLoaded", function () {
             document.getElementById("save-button").addEventListener("click", function (event) {
@@ -36,7 +111,8 @@
                     },
                     body: JSON.stringify({
                         procedures: selectedProcedures,
-                        insurance_company_id: document.getElementById("insurance-company-id").value
+                        insurance_company_id: document.getElementById("insurance-company-id").value,
+                        supplier_id: document.getElementById("supplier-id").value
                     })
                 })
                 .then(response => response.json())
@@ -51,41 +127,4 @@
             });
         });
     </script>
-</head>
-<body>
-    <form id="procedure-form">
-        {% csrf_token %}
-
-        <!-- Campo para o ID da companhia de seguro -->
-        <input type="hidden" id="insurance-company-id" value="{{ insurance_company.id }}">
-
-        <table class="procedure-table" border="1">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Procedimento</th>
-                    <th>Selecionar</th>
-                    <th>Preço</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for procedure in procedures %}
-                    <tr>
-                        <td>{{ procedure.id }}</td>
-                        <td>{{ procedure.name }}</td>
-                        <td>
-                            <input type="checkbox" class="procedure-checkbox" value="{{ procedure.id }}">
-                        </td>
-                        <td>
-                            <input type="text" class="negotiated-price" value="4000"> <!-- Preço negociado editável -->
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-
-        <!-- Botão para salvar -->
-        <button type="button" id="save-button">Salvar</button>
-    </form>
-</body>
-</html>
+{% endblock content %}

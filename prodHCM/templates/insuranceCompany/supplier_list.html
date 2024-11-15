@@ -24,17 +24,10 @@
           <div class="mb-3">
              <input class="form-control" placeholder="pesquisar">
           </div>
-         <form  method="post" autocomplete="off" enctype="multipart/form-data">
+         <form id="procedure-form" method="POST" action="{% url 'add_insurance_supplier' %}">
               {% csrf_token %}
-                {{ form.as_p }}
-                {% if form.errors %}
-                    <div class="alert alert-danger">
-                        {% for field, errors in form.errors.items %}
-                            <strong>{{ field }}:</strong> {{ errors|join:", " }}<br>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-             <button type="submit">Adicionar</button>
+                {{ form }}
+             <button class="btn register-button" type="submit">Adicionar</button>
         </form>
         </div>
       </div>
@@ -63,13 +56,13 @@
           <tbody>
           {% for supplier in suppliers %}
           <tr>
-            <td>{{forloop.counter}}</td>
+            <td>{{ supplier.id }}</td>
             <td>{{ supplier.name}}</td>
             <td>N/A</td>
             <td>{{ supplier.phoneNumber}}</td>
             <td>{{ supplier.address}}</td>
             <td><span class="badge bg-primary">Activo</span></td>
-            <td><button class="btn btn-details"><i class="fa fa-eye"></i></button></td>
+            <td><a href="{% url 'add_insurance_supplier_procedure' supplier.id %}" class="btn btn-details"><i class="fa fa-eye"></i></a></td>
           </tr>
           {% endfor %}
           </tbody>

@@ -2,13 +2,13 @@
 {% block content %}
 
       {% if user.groups.all.0.name == "Admin" %}
-          <img src="{% static 'img/logo.png' %}" class="img-fluid" alt="Logo">
+            {% include "includes/dashboard/dashboard-admin.html" %}
       {% elif user.groups.all.0.name == "InsuranceCompany" %}
-          <img src="{% static 'img/logoSeguradora.png' %}" class="img-fluid" alt="Logo">
+            {% include "includes/dashboard/dashboard-InsuranceCompany.html" %}
       {% elif user.groups.all.0.name == "Supplier" %}
-          <img src="{% static 'img/logoProvedor.png' %}" class="img-fluid" alt="Logo">
+            {% include "includes/dashboard/dashboard-Supplier.html" %}
       {% elif user.groups.all.0.name == "client" %}
-          <img src="{% static 'img/logoCliente.png' %}" class="img-fluid" alt="Logo">
+            {% include "includes/dashboard/dashboard-client.html" %}
       {% else %}
           Welcome, User!
       {% endif %}

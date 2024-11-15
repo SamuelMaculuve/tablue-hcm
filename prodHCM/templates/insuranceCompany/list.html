@@ -12,11 +12,7 @@
     <a href="{% url 'insurance_form' %}" class="btn register-button">Registar cliente</a>
   </div>
 
-    {% if messages %}
-        {% for message in messages %}
-            {% include "includes/sucess_modal_dialog.html" %}
-       {% endfor %}
-    {% endif %}
+{% include "includes/sucess_modal_dialog.html" %}
 
     <div class="table-responsive">
         <table class="table">

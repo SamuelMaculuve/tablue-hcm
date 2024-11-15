@@ -13,14 +13,7 @@
     <a href="{% url 'procedures_form' %}" class="btn register-button">Registar Procedimento</a>
   </div>
 
-{% if messages %}
-    <div>
-        {% for message in messages %}
-            <div class="alert alert-success">{{ message }}</div>
-            <div class="modal fade" id="successModal" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true"</div>
-        {% endfor %}
-    </div>
-{% endif %}
+{% include "includes/sucess_modal_dialog.html" %}
 
  <!-- Companies Table -->
 <div class="table-responsive">

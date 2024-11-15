@@ -40,7 +40,7 @@
             <td>{{ insuranceCompany.name}}</td>
             <td>{{ insuranceCompany.phoneNumber}}</td>
             <td>{{ insuranceCompany.address}}</td>
-            <td><button class="btn btn-details"><i class="fa fa-eye"></i></button></td>
+            <td><a href="{% url 'supplier_client_show' insuranceCompany.id %}" class="btn btn-details"><i class="fa fa-eye"></i></a></td>
           </tr>
           {% endfor %}
           </tbody>

@@ -9,7 +9,6 @@
       <input type="text" class="form-control" placeholder="Procurar">
     </div>
     <a href="#" class="btn register-button" data-bs-toggle="modal" data-bs-target="#addInsuranceModal">Adicionar Provedor</a>
-<!--    <a href="{% url 'add_insurance_supplier' %}" class="btn register-button">Adicionar Provedor</a>x-->
   </div>
 
   <!-- Modal -->
@@ -22,13 +21,11 @@
         <div class="modal-body">
           <h3 style="font-weight: 400;font-size: 25px;">Lista dos provedores</h3>
           <div class="mb-3">
-             <input class="form-control" placeholder="pesquisar">
+             <input class="form-control"  type="text" id="search-box" placeholder="Search suppliers" autocomplete="off">
           </div>
-         <form id="procedure-form" method="POST" action="{% url 'add_insurance_supplier' %}">
-              {% csrf_token %}
-                {{ form }}
-             <button class="btn register-button" type="submit">Adicionar</button>
-        </form>
+          <div id="supplier-list" class="scrollable-list">
+              <!-- Results will be displayed here -->
+          </div>
         </div>
       </div>
     </div>
@@ -68,5 +65,52 @@
           </tbody>
         </table>
       </div>
+
+
+<script>
+    const searchBox = document.getElementById('search-box');
+    const supplierList = document.getElementById('supplier-list');
+
+    // Função para carregar os suppliers dinamicamente
+    function loadsuppliers(query = '') {
+        fetch(`/dashboard/search-suppliers/?q=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(data => {
+                supplierList.innerHTML = ''; // Limpar lista existente
+                if (data.length > 0) {
+                    data.forEach(supplier => {
+                        // Criar <p> com classe pato
+                        const p = document.createElement('p');
+                        p.classList.add('supplier-list');
+
+                        // Criar <a> dentro do <p>
+                        const link = document.createElement('a');
+                        link.href = `/dashboard/insurance/supplier/procedure/${supplier.id}`;
+                        link.textContent = supplier.name;
+                        link.classList.add('supplier-link');
+
+                        // Adicionar o <a> ao <p>
+                        p.appendChild(link);
+
+                        // Adicionar o <p> à lista de resultados
+                        supplierList.appendChild(p);
+                    });
+                } else {
+                    supplierList.innerHTML = '<p>Nenhum provedor encontrado.</p>';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching suppliers:', error);
+            });
+    }
+
+    // Carregar os 3 primeiros suppliers ao abrir a página
+    document.addEventListener('DOMContentLoaded', () => loadsuppliers());
+
+    // Atualizar os resultados conforme o usuário digita
+    searchBox.addEventListener('input', function () {
+        loadsuppliers(searchBox.value);
+    });
+</script>
 
 {% endblock content %}

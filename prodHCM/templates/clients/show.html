@@ -1,6 +1,7 @@
 {% extends "base/base.html" %}
 {% load crispy_forms_tags %}
 {% block content %}
+{% include "includes/sucess_modal_dialog.html" %}
 <div class="container">
     <!-- Tabs Navigation -->
     <ul class="nav nav-tabs" id="myTab" role="tablist">
@@ -35,12 +36,16 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                       </div>
                       <div class="modal-body">
-                        <form>
 
-                         <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                <button type="button" class="btn btn-primary">Send message</button>
-                         </div>
+                        <form method="post" action="{% url 'client_plan_store' %}">
+                            {% csrf_token %}
+                             {{form}}
+
+                            <input value="{{client.id}}" name="client" type="hidden">
+
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-primary">Adicionar</button>
+                             </div>
                         </form>
                       </div>
 
@@ -49,29 +54,28 @@
                 </div>
 
             <div class="table-responsive">
-                    <table class="table">
-                      <thead class="table-custom">
-                      <tr>
-                        <th>ID</th>
-                        <th>Nome da empresa</th>
-                        <th>Contacto</th>
-                        <th>Endereço</th>
-                        <th>Detalhes</th>
-                      </tr>
-                      </thead>
-                      <tbody>
-                      {% for client in clients %}
-                      <tr>
-                        <td>{{ client.id }}</td>
-                        <td>{{client.name}}</td>
-                        <td>{{client.nuitNumber}}</td>
-                        <td>{{client.address}}</td>
-                        <td><a href="{% url 'client_detail' id=client.id %}" class="btn btn-details"><i class="fa fa-eye"></i></a></td>
-                      </tr>
-                      {% endfor %}
-                      </tbody>
-                    </table>
-                  </div>
+        <table class="table">
+          <thead class="table-custom">
+          <tr>
+            <th>ID</th>
+            <th>Pacote</th>
+            <th>Estado</th>
+            <th>Detalhes</th>
+          </tr>
+          </thead>
+          <tbody>
+
+          {% for insurancePlan in insurancePlans %}
+          <tr>
+            <td>{{ insurancePlan.id }}</td>
+            <td>{{insurancePlan.name}}</td>
+            <td><span class="badge bg-primary">{{ insurancePlan.status }}</span></td>
+            <td><a href="{% url 'insurance_plan_show' insurancePlan.id %}" class="btn btn-details"><i class="fa fa-eye"></i></a></td>
+          </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
         </div>
 
         <!-- Beneficiários Tab -->
@@ -84,76 +88,83 @@
                   </span>
                   <input type="text" class="form-control" placeholder="Procurar">
                 </div>
-            
+
                 <!-- Botão de registro -->
-                <a href="#" data-bs-toggle="modal" data-bs-target="#beneficiariosModalModal" data-bs-whatever="@mdo" class="btn register-button">Adicionar</a>
+                <a href="{% url 'beneficiarie_client_create' client_id=client.id %}" class="btn register-button">Adicionar</a>
               </div>
-            
             <div class="table-responsive">
                     <table class="table">
                       <thead class="table-custom">
                       <tr>
                         <th>ID</th>
                         <th>Nome da empresa</th>
-                        <th>Contacto</th>
-                        <th>Endereço</th>
+                        <th>Email</th>
+                        <th>Estado</th>
                         <th>Detalhes</th>
                       </tr>
                       </thead>
                       <tbody>
-                      {% for client in clients %}
+                      {% for beneficiaries in beneficiaries %}
                       <tr>
-                        <td>{{ client.id }}</td>
-                        <td>{{client.name}}</td>
-                        <td>{{client.nuitNumber}}</td>
-                        <td>{{client.address}}</td>
-                        <td><a href="{% url 'client_detail' id=client.id %}" class="btn btn-details"><i class="fa fa-eye"></i></a></td>
+                        <td>{{ beneficiaries.id }}</td>
+                        <td>{{beneficiaries.name}}</td>
+                        <td>{{beneficiaries.email}}</td>
+                        <td>{{beneficiaries.insurancePlan}}</td>
+                        <td><a href="#" class="btn btn-details"><i class="fa fa-eye"></i></a></td>
                       </tr>
                       {% endfor %}
                       </tbody>
                     </table>
                   </div>
-            <div class="modal fade" id="beneficiariosModalModal" tabindex="-1" aria-labelledby="beneficiariosModalModalLabel" aria-hidden="true">
-                  <div class="modal-dialog">
-                    <div class="modal-content">
-                      <div class="modal-header">
-                        <h5 class="modal-title" id="beneficiariosModalModalLabel">Adicionar Beneficiários</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                      </div>
-                      <div class="modal-body">
-                        <form>
-
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                <button type="button" class="btn btn-primary">Send message</button>
-                           </div>
-                        </form>
-                      </div>
-
-                    </div>
-                  </div>
-                </div>
-
         </div>
     </div>
 </div>
-<!--    <h1>Client Details</h1>-->
-<!--    <p><strong>Insurance Company:</strong> {{ client.insuranceCompany }}</p>-->
-<!--    <p><strong>Name:</strong> {{ client.name }}</p>-->
-<!--    <p><strong>NUIT Number:</strong> {{ client.nuitNumber }}</p>-->
-<!--    <p><strong>Phone Number:</strong> {{ client.phoneNumber }}</p>-->
-<!--    <p><strong>Date of Activity Start:</strong> {{ client.date_of_activity_start }}</p>-->
-<!--    <p><strong>Email:</strong> {{ client.email }}</p>-->
-<!--    <p><strong>Address:</strong> {{ client.address }}</p>-->
-<!--    <p><strong>District:</strong> {{ client.district }}</p>-->
-<!--    <p><strong>Province:</strong> {{ client.province }}</p>-->
 
-<!--    {% if client.contractFile %}-->
-<!--        <p><strong>Contract File:</strong> <a href="{{ client.contractFile.url }}">Download</a></p>-->
-<!--    {% endif %}-->
+{% if linkGenerated %}
+<div class="modal fade" id="beneficiariosModalModal" tabindex="-1" aria-labelledby="beneficiariosModalModalLabel" aria-hidden="true">
+     <div class="modal-dialog modal-fullscreen">
+         <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="beneficiariosModalModalLabel">O processo foi bem sucedido? <a href="{% url 'client_beneficiaries_store' session=session_id client=client.id %}">Continuar <i class="fa fa-arrow-circle-right"></i> </a></h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                         <div class="iframe-container">
+                            <iframe class="embed-responsive-item"  allow="camera; microphone"  src="{{ linkGenerated }}" allowfullscreen></iframe>
+                        </div>
+                        <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-primary">Send message</button>
+                           </div>
+                      </div>
+         </div>
+     </div>
+</div>
 
-<!--    {% if client.nuitFile %}-->
-<!--        <p><strong>NUIT File:</strong> <a href="{{ client.nuitFile.url }}">Download</a></p>-->
-<!--    {% endif %}-->
+
+    <script>
+        const userName = "{{ session_id }}";
+
+        // Verificar se já existe um user_name no localStorage
+        if (!localStorage.getItem("session_id")) {
+            localStorage.setItem("session_id", userName);
+            console.log("user_name saved in localStorage:", userName);
+        } else {
+            console.log("user_name already exists in localStorage:", localStorage.getItem("session_id"));
+        }
+    </script>
+<script>
+    // Aguarda o carregamento completo da página
+    document.addEventListener('DOMContentLoaded', function () {
+      // Seleciona o modal pelo ID
+      var myModal = new bootstrap.Modal(document.getElementById('beneficiariosModalModal'));
+
+      // Abre o modal
+      myModal.show();
+    });
+</script>
+{% endif %}
+
+
 
 {% endblock content %}

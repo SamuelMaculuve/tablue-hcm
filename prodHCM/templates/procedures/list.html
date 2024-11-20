@@ -1,5 +1,9 @@
 {% extends "base/base.html" %}
 {% block content %}
+
+
+{% include "includes/sucess_modal_dialog.html" %}
+
   <div class="container search-container">
     <!-- Campo de busca com ícone -->
     <div class="input-group search-input">
@@ -13,7 +17,7 @@
     <a href="{% url 'procedures_form' %}" class="btn register-button">Registar Procedimento</a>
   </div>
 
-{% include "includes/sucess_modal_dialog.html" %}
+
 
  <!-- Companies Table -->
 <div class="table-responsive">
@@ -28,7 +32,7 @@
           <tbody>
           {% for procedure in procedures %}
           <tr>
-            <td>{{forloop.id}}</td>
+            <td>{{procedure.id}}</td>
             <td>{{procedure.name}}</td>
             <td><button class="btn btn-details"><i class="fa fa-eye"></i></button></td>
           </tr>

@@ -19,8 +19,7 @@ class SubCategory(models.Model):
 
 class Procedure(models.Model):
     name = models.CharField("Procedimento",max_length=255)
-    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
-    subCategory = models.ForeignKey(SubCategory, on_delete=models.SET_NULL, null=True)
+    subCategory = models.ForeignKey(SubCategory,related_name='procedure', on_delete=models.SET_NULL, null=True)
     base_price = models.DecimalField("Preço Base", max_digits=10, decimal_places=2, default=0, null=True)
 
     def __str__(self):
@@ -107,6 +106,20 @@ class InsuranceCompanyProcedure(models.Model):
     def __str__(self):
         return f"{self.insuranceCompany} - {self.supplier} - {self.procedure} - {self.negotiated_price}"
 
+class InsurancePlan(models.Model):
+    name = models.CharField("Nome do Plano", max_length=255)
+    status = models.CharField("Status do Plano", max_length=20, choices=[
+        ('ativo', 'Ativo'),
+        ('cancelado', 'Cancelado'),
+        ('suspenso', 'Suspenso'),
+        ('expirado', 'Expirado'),
+    ], default='ativo')
+    insuranceCompany = models.ForeignKey(InsuranceCompany, on_delete=models.CASCADE, null=True, blank=True)
+    procedure = models.ManyToManyField(Procedure, blank=True,related_name='insurancePlan')
+
+    def __str__(self):
+        return self.name
+
 class Client(models.Model):
     name = models.CharField("Nome da empresa",max_length=255)
     nuitNumber = models.CharField("NUIT",max_length=15)
@@ -120,11 +133,9 @@ class Client(models.Model):
     nuitFile = models.FileField(upload_to='static/img/clients/')
     insuranceCompany = models.ForeignKey(InsuranceCompany, on_delete=models.CASCADE,null=True, blank=True)
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True, related_name='client')
+    insurancePlan = models.ManyToManyField(InsurancePlan, null=True, blank=True, related_name='insurancePlan')
 
     def save(self, *args, **kwargs):
-
-        # insuranceCompany = InsuranceCompany.objects.get(id=6)
-
         if not self.user:
             new_user = User.objects.create_user(
                 username=self.name.lower().replace(" ", "_"),
@@ -142,32 +153,31 @@ class Client(models.Model):
     def __str__(self):
         return self.name
 
-class InsurancePlan(models.Model):
-    name = models.CharField("Nome do Plano", max_length=255)
-    status = models.CharField("Status do Plano", max_length=20, choices=[
-        ('ativo', 'Ativo'),
-        ('cancelado', 'Cancelado'),
-        ('suspenso', 'Suspenso'),
-        ('expirado', 'Expirado'),
-    ], default='ativo')
-    insuranceCompany = models.ForeignKey(InsuranceCompany, on_delete=models.CASCADE, null=True, blank=True)
-    procedure = models.ManyToManyField(Procedure, blank=True)
-
 
 class Beneficiaries(models.Model):
-    name = models.CharField("Nome da empresa",max_length=255)
-    nuitNumber = models.CharField("NUIT",max_length=15)
-    phoneNumber = models.CharField("Número de celular",max_length=15)
-    date_of_activity_start = models.DateField("Início de actividade")
-    email = models.CharField("Email",max_length=100)
-    address = models.CharField("Endereço",max_length=100)
-    district = models.CharField("Distrito",max_length=100)
-    province = models.CharField("Provincia",max_length=100)
-    client = models.ForeignKey(Client, on_delete=models.CASCADE, null=True, blank=True)
-    insuranceCompany = models.ForeignKey(InsuranceCompany, on_delete=models.CASCADE, null=True, blank=True)
-    insurancePlan = models.ForeignKey(InsurancePlan, on_delete=models.CASCADE)
+    name = models.CharField("Nome da Completo",max_length=255)
+    nuitNumber = models.CharField("NUIT",max_length=15, null=True, blank=True)
+    phoneNumber = models.CharField("Número de celular",max_length=15, null=True, blank=True)
+    date_of_activity_start = models.DateField("Início de actividade", null=True, blank=True)
+    email = models.CharField("Email",max_length=100, null=True, blank=True)
+    address = models.CharField("Endereço",max_length=100, null=True, blank=True)
+    district = models.CharField("Distrito",max_length=100, null=True, blank=True)
+    province = models.CharField("Provincia",max_length=100, null=True, blank=True)
+    session_id = models.CharField("session_id",max_length=100,null=True, blank=True)
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, null=True, blank=True, related_name='beneficiaries')
+    insuranceCompany = models.ForeignKey(InsuranceCompany, on_delete=models.CASCADE, null=True, blank=True, related_name='beneficiaries')
+    insurancePlan = models.ForeignKey(InsurancePlan, on_delete=models.CASCADE, related_name='beneficiaries')
 
+    def __str__(self):
+        return self.name
 
+class BeneficiarieTreatment(models.Model):
+    beneficiarie = models.ForeignKey(Beneficiaries, on_delete=models.CASCADE, related_name='beneficiarieTreatment')
+    procedure = models.ForeignKey(Procedure, on_delete=models.CASCADE, null=True, blank=True, related_name='beneficiarieTreatment')
+    created_at = models.DateTimeField(auto_now_add=True)  # Automatically sets the creation date
+    updated_at = models.DateTimeField(auto_now=True)      # Automatically updates the timestamp on save
 
+    def __str__(self):
+        return f"Treatment for {self.beneficiarie} - {self.procedure}"
 
 

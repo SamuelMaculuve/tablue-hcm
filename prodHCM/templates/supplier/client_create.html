@@ -1,0 +1,51 @@
+{% extends "base/base.html" %}
+{% block content %}
+{% load crispy_forms_tags %}
+
+    <form action="" method="post" autocomplete="off" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <input name="insuranceCompany" value="{{ insuranceCompany.id }}">
+        <input name="client" value="{{ }}" >
+
+        <div class="row mt-4">
+            <div class="col-md-3">
+               {{form.name|as_crispy_field}}
+            </div>
+            <div class="col-md-3">
+                {{form.email|as_crispy_field}}
+            </div>
+            <div class="col-md-3">
+                {{form.insurancePlan|as_crispy_field}}
+            </div>
+            <div class="col-md-3">
+              <button type="submit" class="btn btn-dark mt-4">Adicionar</button>
+            </div>
+        </div>
+    </form>
+
+    {% if messages %}
+        <div>
+            {% for message in messages %}
+                <div class="alert alert-success">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+      <!-- Companies Table -->
+    <div class="table-responsive mt-4">
+        <table class="table">
+          <thead class="table-custom">
+          <tr>
+            <th>Nome</th>
+            <th>Email</th>
+            <th>Plano</th>
+            <th>Acção</th>
+          </tr>
+          </thead>
+          <tbody>
+
+          </tbody>
+        </table>
+      </div>
+
+{% endblock content %}

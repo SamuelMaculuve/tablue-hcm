@@ -1,0 +1,125 @@
+{% extends "base/base.html" %}
+{% block content %}
+<div class="container">
+      <div class="form-section">
+        <div class="beneficiarie">
+            <p>Nome: {{ beneficiarie.name }}</p>
+            <p>Empresa: {{ client.name }}</p>
+        </div>
+        <p style="font-weight: 400;">Lista de procedimento
+        </p>
+      <div class="table-responsive mt-4">
+    <form id="procedure-form">
+        {% csrf_token %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Procedimento</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for procedure in procedures %}
+                    <tr>
+                        <td>{{ procedure.id }}</td>
+                        <td>{{ procedure.name }}</td>
+                        <td>
+                            <input type="checkbox" class="procedure-checkbox"
+                                   {% if procedure.id in saved_procedures_ids %}
+                                        checked
+                                   {% endif %}
+                                   value="{{ procedure.id }}">
+                        </td>
+
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Botão para salvar -->
+        <button type="button" id="save-button" class="btn">Continuar</button>
+         <div class="modal fade" id="beneficiariosModalModal" tabindex="-1" aria-labelledby="beneficiariosModalModalLabel" aria-hidden="true">
+     <div class="modal-dialog modal-fullscreen">
+         <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="beneficiariosModalModalLabel">O processo foi bem sucedido? <a href="#">Continuar <i class="fa fa-arrow-circle-right"></i> </a></h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                         <div class="iframe-container">
+                            <iframe class="embed-responsive-item"  allow="camera; microphone"  src="https://fnbsdk.tablu.tech?id=ggpsz4PAG1yCQlqaXR3O372" allowfullscreen></iframe>
+                        </div>
+                        <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-primary">Send message</button>
+                           </div>
+                      </div>
+         </div>
+     </div>
+</div>
+
+      <script>
+    // Aguarda o carregamento completo da página
+    document.addEventListener('DOMContentLoaded', function () {
+      // Seleciona o modal pelo ID
+      var myModal = new bootstrap.Modal(document.getElementById('beneficiariosModalModal'));
+
+      // Abre o modal
+      myModal.show();
+    });
+</script>
+    </form>
+</div>
+      </div>
+    </div>
+
+<script>
+        // Função JavaScript para capturar os IDs dos checkboxes selecionados e o preço negociado
+        document.addEventListener("DOMContentLoaded", function () {
+            document.getElementById("save-button").addEventListener("click", function (event) {
+                event.preventDefault(); // Impede o envio padrão do formulário
+
+                // Coletar os IDs dos checkboxes marcados e os preços negociados
+                const selectedProcedures = Array.from(
+                    document.querySelectorAll(".procedure-checkbox:checked")
+                ).map(checkbox => {
+                    const row = checkbox.closest('tr');
+                    const negotiatedPrice = row.querySelector(".negotiated-price").value; // Captura o preço negociado
+                    return {
+                        procedure_id: checkbox.value,
+                        negotiated_price: negotiatedPrice
+                    };
+                });
+
+                if (selectedProcedures.length === 0) {
+                    alert("Selecione pelo menos um procedimento.");
+                    return;
+                }
+
+                // Fazer a requisição AJAX
+                fetch("{% url 'save_procedures' %}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": "{{ csrf_token }}"
+                    },
+                    body: JSON.stringify({
+                        procedures: selectedProcedures,
+                        insurance_company_id: document.getElementById("insurance-company-id").value,
+                        supplier_id: document.getElementById("supplier-id").value
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert("Procedimentos salvos com sucesso!");
+                    } else {
+                        alert(data.error || "Erro ao salvar procedimentos.");
+                    }
+                })
+                .catch(error => console.error("Erro na requisição:", error));
+            });
+        });
+    </script>
+{% endblock content %}

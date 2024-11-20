@@ -22,7 +22,10 @@
             </div>
 
             <div class="mb-3">
-                {{form.province|as_crispy_field}}
+                <label for="district" class="form-label">Distrito</label>
+               <select id="district" name="district" class="form-select">
+                                        <option value="">Selecionar Distrito</option>
+                                    </select>
             </div>
 
             <div class="row">
@@ -46,7 +49,20 @@
         <div class="col-md-6">
             <div class="row">
               <div class="col-md-12">
-                {{form.district|as_crispy_field}}
+                  <label for="province" class="form-label">Província</label>
+                  <select id="province" name="province" class="form-select" onchange="updateDistricts()">
+                                        <option value="">Selecionar Província</option>
+                                        <option value="Maputo">Maputo</option>
+                                        <option value="Gaza">Gaza</option>
+                                        <option value="Inhambane">Inhambane</option>
+                                        <option value="Sofala">Sofala</option>
+                                        <option value="Manica">Manica</option>
+                                        <option value="Tete">Tete</option>
+                                        <option value="Zambézia">Zambézia</option>
+                                        <option value="Nampula">Nampula</option>
+                                        <option value="Cabo Delgado">Cabo Delgado</option>
+                                        <option value="Niassa">Niassa</option>
+                                    </select>
               </div>
             </div>
 

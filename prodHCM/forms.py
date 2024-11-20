@@ -3,7 +3,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.forms import modelformset_factory
 
 from prodHCM.models import InsuranceCompany, Procedure, Category, Client, Supplier, InsurancePlan, \
-    InsuranceCompanyProcedure
+    InsuranceCompanyProcedure, BeneficiarieTreatment, Beneficiaries, SubCategory
 
 
 class CustomLoginForm(AuthenticationForm):
@@ -21,7 +21,18 @@ class InsuranceCompanyFrom(forms.ModelForm):
         # fields = '__all__'
         fields = ('name','nuitNumber','phoneNumber','date_of_activity_start','email','address','district','province','contractFile','nuitFile','insuranceCompanyType')
         widgets = {
-            'date_of_activity_start': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'date_of_activity_start': forms.DateInput(
+            format='%Y-%m-%d',  # Specify the date format (e.g., YYYY-MM-DD)
+            attrs={
+                'type': 'date',  # HTML5 date picker
+                'class': 'form-control',  # Add Bootstrap styling (optional)
+                'placeholder': 'YYYY-MM-DD',
+            }
+        ),
+        },
+
+        labels = {
+            'insuranceCompanyType': 'Tipo',
         }
 
     def __init__(self, *args, **kwargs):
@@ -71,15 +82,8 @@ class ProceduresFrom(forms.ModelForm):
     class Meta:
         model = Procedure
         fields = '__all__'
-        # fields = ('clientType','fullname','nuitNumber','date_of_activity_start')
+        subCategory = forms.ModelChoiceField(queryset=SubCategory.objects.none(), empty_label="Selecione a categoria primeiro")
 
-    # def __init__(self, *args, **kwargs):
-    #     super(Category,self).__init__(*args, **kwargs)
-    #     self.fields['category'].empty_label = "Select"
-    #
-    # def __init__(self, *args, **kwargs):
-    #     super(SubCategory,self).__init__(*args, **kwargs)
-    #     self.fields['category'].empty_label = "Select"
 
 class ClientsForm(forms.ModelForm):
         class Meta:
@@ -90,6 +94,15 @@ class ClientsForm(forms.ModelForm):
                 'insuranceCompany': forms.HiddenInput(),
                 'date_of_activity_start': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             }
+
+
+class AddInsurancePlanClientFrom(forms.Form):
+    insurancePlan = forms.ModelMultipleChoiceField(
+        queryset=InsurancePlan.objects.all(),  # Inicialmente vazio
+        # queryset=InsurancePlan.objects.none(),  # Inicialmente vazio
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'single-InsurancePlan'}),
+        label=''
+    )
 
 class SupplierForm(forms.ModelForm):
     class Meta:
@@ -104,6 +117,24 @@ class SupplierForm(forms.ModelForm):
             # If no procedures are selected, return an empty list
             procedure = self.cleaned_data.get('procedures', [])
             return procedures
-    # def __init__(self, *args, **kwargs):
-    #     super(ProviderForm, self).__init__(*args, **kwargs)
-    #     self.fields['insuranceCompany'].empty_label = "Select"
+
+class BeneficiarieTreatmentForm(forms.ModelForm):
+    class Meta:
+        model = BeneficiarieTreatment
+        fields = '__all__'
+        widgets = {
+            'beneficiarie': forms.HiddenInput(),
+            'procedures': forms.CheckboxSelectMultiple(),
+        }
+
+class BeneficiariesForm(forms.ModelForm):
+    class Meta:
+        model = Beneficiaries
+        fields = ('insuranceCompany','client','name','email','insurancePlan')
+        widgets = {
+            'client': forms.HiddenInput(),
+            'insuranceCompany': forms.HiddenInput(),
+        }
+        labels = {
+            'insurancePlan': 'Plano',
+        }

@@ -1,41 +1,48 @@
 {% extends "base/base.html" %}
 {% load crispy_forms_tags %}
-
 {% block content %}
+
+ {% include "includes/sucess_modal_dialog.html" %}
 
     <form action="" method="post" autocomplete="off" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="row mt-4">
             <div class="col-md-3">
-              {{form.category|as_crispy_field}}
+                <label class="form-label requiredField">
+                Categoria<span class="asteriskField">*</span>
+                </label>
+                 <select id="categoria_id" name="categoria_id" class="form-control">
+                    <option value="">Selecione a Categoria</option>
+                    {% for categorys in categorys %}
+                        <option value="{{ categorys.id }}">{{ categorys.name }}</option>
+                    {% endfor %}
+                </select>
             </div>
             <div class="col-md-3">
-              {{form.subCategory|as_crispy_field}}
+                <label class="form-label requiredField">
+                SubCategoria<span class="asteriskField">*</span>
+                </label>
+                  <select id="id_subcategoria" name="subCategory" class="form-control">
+                    <option value="">Selecione a Subcategoria</option>
+                 </select>
             </div>
             <div class="col-md-3">
-                {{form.name|as_crispy_field}}
+                <label class="form-label requiredField">
+                Procedimento<span class="asteriskField">*</span>
+            </label>
+                <input type="text" name="name" maxlength="255" class="textinput form-control" required="" id="procedure_name">
             </div>
             <div class="col-md-3">
-              <button type="submit" class="btn btn-dark mt-4">Adicionar</button>
+              <button type="button" class="btn btn-dark mt-4" id="add_procedures">Adicionar</button>
             </div>
         </div>
     </form>
-
-
       <div class="container mt-3 mb-3">
         <a href="#" class="add-category-link">Adicionar nova categoria ➔</a>
       </div>
-
-    {% if messages %}
-        <div>
-            {% for message in messages %}
-                <div class="alert alert-success">{{ message }}</div>
-            {% endfor %}
-        </div>
-    {% endif %}
       <!-- Companies Table -->
     <div class="table-responsive">
-        <table class="table">
+        <table class="table" id="procedures_table" >
           <thead class="table-custom">
           <tr>
             <th>Categoria</th>
@@ -45,24 +52,116 @@
           </tr>
           </thead>
           <tbody>
-           {% for procedure in procedure %}
-          <tr>
-            <td>{{procedure.category}}</td>
-            <td>{{procedure.subcategory}}</td>
-            <td>{{procedure.name}}</td>
-            <td><button class="btn btn-details"><i class="fa fa-eye"></i></button></td>
-          </tr>
-          {% endfor %}
-<!--          <tr>-->
-<!--            <td colspan="3" style="border-bottom: none;">-->
-<!--              <center>-->
-<!--                <img src="empty.svg" class="pt-5 mb-3">-->
-<!--                <p class="pb-5">Lista vazia</p>-->
-<!--              </center></td>-->
-<!--          </tr>-->
+            <tr id="empty_row" class="empty_row">
+                <td colspan="4" style="text-align: center;border-bottom: none;" ><i class="fa fa-file bg-white"  style="font-size: 37pt;color: #999999;margin-top: 20px;" aria-hidden="true"></i><br>Vazio</td>
+             </tr>
           </tbody>
         </table>
       </div>
 
+<form id="submit_procedures_form" method="post" action="{% url 'procedures_form' %}">
+    {% csrf_token %}
+    <input type="hidden" id="procedures_data" name="procedures_data" />
+   <div class="d-flex justify-content-end gap-3 mt-4 fixed-bottom-right">
+    <button type="button" class="btn btn-cancel mr-4">Cancelar</button>
+    <button type="submit" class="btn btn-confirm">Confirmar</button>
+</div>
 
+</form>
+
+
+<script>
+    $(document).ready(function() {
+    // Quando a categoria é selecionada
+    $('#categoria_id').change(function() {
+        var category_id = $(this).val();
+        if (category_id) {
+            $.ajax({
+                url: '/dashboard/get_subcategorias/',  // URL para buscar subcategorias
+                data: {
+                    'category_id': category_id
+                },
+                success: function(data) {
+                    var subCategorys_select = $('#id_subcategoria');
+                    subCategorys_select.empty();
+                    subCategorys_select.append('<option value="">Selecione a Subcategoria</option>');
+                    $.each(data.subCategorys, function(index, subCategorys) {
+                        subCategorys_select.append('<option value="' + subCategorys.id + '">' + subCategorys.nome + '</option>');
+                    });
+                }
+            });
+        }
+    });
+});
+
+
+
+$(document).ready(function () {
+    const procedures = [];
+
+   function toggleEmptyRow() {
+        if ($('#procedures_table tbody tr').length === 0) {
+            $('#procedures_table tbody').append(`
+                <tr class="empty_row">
+                    <td colspan="4" style="text-align: center;border-bottom: none;" ><i class="fa fa-file bg-white"  style="font-size: 37pt;color: #999999;margin-top: 20px;" aria-hidden="true"></i><br>Vazio</td>
+                </tr>
+            `);
+        } else {
+            $('#procedures_table tbody .empty_row').remove();
+        }
+    }
+    // Add Dignitary to the Table
+    $('#add_procedures').click(function () {
+        const categoryId = $('#categoria_id').val();
+        const categoryName = $('#categoria_id option:selected').text();
+        const subcategoryId = $('#id_subcategoria').val();
+        const subcategoryName = $('#id_subcategoria option:selected').text();
+        const dignitaryName = $('#procedure_name').val();
+
+        if (!categoryId || !subcategoryId || !dignitaryName) {
+            alert('Selecione uma categoria, subcategoria e insira o nome do procedimento.');
+            return;
+        }
+
+        // Add to Table
+        const newRow = `
+            <tr>
+                <td>${categoryName}</td>
+                <td>${subcategoryName}</td>
+                <td>${dignitaryName}</td>
+                <td><button type="button" class="remove_dignitary btn btn-remove"> <i class="fa-solid fa-x"></i></button></td>
+            </tr>`;
+        $('#procedures_table tbody').append(newRow);
+
+        // Add to Array
+        procedures.push({
+            name: dignitaryName,
+            category_id: categoryId,
+            subcategory_id: subcategoryId
+        });
+
+       toggleEmptyRow();
+
+        // Clear Input
+        $('#procedure_name').val('');
+    });
+
+    // Remove Dignitary from Table and Array
+    $(document).on('click', '.remove_dignitary', function () {
+        const rowIndex = $(this).closest('tr').index();
+        procedures.splice(rowIndex, 1);
+        $(this).closest('tr').remove();
+
+
+        toggleEmptyRow();
+    });
+
+    // Submit All procedures
+    $('#submit_procedures_form').submit(function () {
+        $('#procedures_data').val(JSON.stringify(procedures));
+    });
+});
+
+
+</script>
 {% endblock content %}

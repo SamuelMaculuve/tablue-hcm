@@ -1,0 +1,55 @@
+{% extends "base/base.html" %}
+{% block content %}
+{% load crispy_forms_tags %}
+
+    {% include "includes/sucess_modal_dialog.html" %}
+
+    <form action="" method="post" autocomplete="off" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <input name="insuranceCompany" value="{{ insuranceCompany.id }}" type="hidden">
+        <input name="client" value="{{client.id }}" type="hidden">
+
+        <div class="row mt-4">
+            <div class="col-md-3">
+               {{form.name|as_crispy_field}}
+            </div>
+            <div class="col-md-3">
+                {{form.email|as_crispy_field}}
+            </div>
+            <div class="col-md-3">
+                {{form.insurancePlan|as_crispy_field}}
+            </div>
+            <div class="col-md-3">
+              <button type="submit" class="btn btn-dark mt-4">Adicionar</button>
+            </div>
+        </div>
+    </form>
+
+    <!-- Companies Table -->
+  <div class="table-responsive">
+                    <table class="table">
+                      <thead class="table-custom">
+                      <tr>
+                        <th>ID</th>
+                        <th>Nome da empresa</th>
+                        <th>Email</th>
+                        <th>Estado</th>
+                        <th>Detalhes</th>
+                      </tr>
+                      </thead>
+                      <tbody>
+                      {% for beneficiaries in beneficiaries %}
+                      <tr>
+                        <td>{{ beneficiaries.id }}</td>
+                        <td>{{beneficiaries.name}}</td>
+                        <td>{{beneficiaries.email}}</td>
+                        <td>{{beneficiaries.insurancePlan}}</td>
+                        <td><a href="#" class="btn btn-details"><i class="fa fa-eye"></i></a></td>
+                      </tr>
+                      {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+
+{% endblock content %}

@@ -21,15 +21,8 @@ class InsuranceCompanyFrom(forms.ModelForm):
         # fields = '__all__'
         fields = ('name','nuitNumber','phoneNumber','date_of_activity_start','email','address','district','province','contractFile','nuitFile','insuranceCompanyType')
         widgets = {
-            'date_of_activity_start': forms.DateInput(
-            format='%Y-%m-%d',  # Specify the date format (e.g., YYYY-MM-DD)
-            attrs={
-                'type': 'date',  # HTML5 date picker
-                'class': 'form-control',  # Add Bootstrap styling (optional)
-                'placeholder': 'YYYY-MM-DD',
-            }
-        ),
-        },
+            'date_of_activity_start': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+        }
 
         labels = {
             'insuranceCompanyType': 'Tipo',

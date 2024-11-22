@@ -1,0 +1,271 @@
+{% load crispy_forms_tags %}
+<style>
+    #preview-dialog {
+    display: none;
+    border: 1px solid #ccc;
+    padding: 20px;
+    background-color: #fff;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+}
+
+#preview-dialog h3 {
+    margin-top: 0;
+}
+
+#preview-dialog table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#preview-dialog table th, #preview-dialog table td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: left;
+}
+
+</style>
+<div class="stepv2">
+<div class="container mt-5">
+ <div class="steps-container">
+                        <!-- Passo 1: Dados da empresa (Ativo) -->
+                        <div class="step step-inactive">
+                          <div class="step-number">1</div>
+                          <span>Dados da empresa</span>
+                        </div>
+                        <!-- Separador -->
+                        <div class="step step-active">
+                          <div class="step-number">2</div>
+                          <span>Procedimentos</span>
+                        </div>
+                      </div>
+ </div>
+
+ <div class="container">
+
+
+                     <div class="row mt-4">
+            <div class="col-md-4">
+                <label class="form-label requiredField">
+                Categoria<span class="asteriskField">*</span>
+                </label>
+                 <select id="categoria_id" name="categoria_id" class="form-control">
+                    <option value="">Selecione a Categoria</option>
+                    {% for categorys in categorys %}
+                        <option value="{{ categorys.id }}">{{ categorys.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label requiredField">
+                SubCategoria<span class="asteriskField">*</span>
+                </label>
+                  <select id="id_subcategoria" name="subCategory" class="form-control">
+                    <option value="">Selecione a Subcategoria</option>
+                 </select>
+            </div>
+
+        </div>
+
+
+                          <div class="form-container">
+
+                          <div class="mt-2 mb-2">
+                            <a href="#" class="add-category-link">Adicionar novo procedimento ➔</a>
+                          </div>
+
+                        </div>
+
+                        <div class="table-responsive" id="subcategoria-table">
+                          <table class="table">
+                            <thead class="table-custom">
+                            <tr>
+                              <th>ID</th>
+                              <th>Nome</th>
+                              <th></th>
+                               <th>Preço</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+
+                            </tbody>
+                          </table>
+
+                        </div>
+
+                      </div>
+         <div class="d-flex  mb-3">
+            <button type="button"  class="btn btn-close-white custom-btn" style="margin-right: 20px;" onclick="prevStep()">Cancelar</button>
+            <button type="button" class="btn btn-dark custom-btn" id="submit-data">Submeter</button>
+         </div>
+        </div>
+
+ <div class="modal fade" id="prevProvedorModalModal" tabindex="-1" aria-labelledby="prevProvedorModalModalLabel" aria-hidden="true">
+     <div class="modal-dialog modal-fullscreen">
+         <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="prevProvedorModalModalLabel">Dados Selecionados <i class="fa fa-info"></i> </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                        <div class="container">
+                            <div class="table-responsive">
+                                <table class="table">
+                                <thead class="table-custom">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Nome</th>
+                                        <th>Preço</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="preview-data">
+                                    <!-- Dados selecionados serão adicionados aqui -->
+                                </tbody>
+                            </table>
+                                  <div class="modal-footer">
+                                <button type="button" class="btn btn-cancel" data-bs-dismiss="modal">Fechar</button>
+                                <button type="button" class="btn btn-primary" id="submitFom">Confirmar</button>
+                           </div>
+                            </div>
+                        </div>
+
+                      </div>
+         </div>
+     </div>
+</div>
+ <input type="hidden" id="procedures_data" name="procedures_data" />
+<script>
+
+$(document).ready(function() {
+    // Quando a categoria é selecionada
+    $('#categoria_id').change(function() {
+        var category_id = $(this).val();
+        if (category_id) {
+            $.ajax({
+                url: '/dashboard/get_subcategorias/',  // URL para buscar subcategorias
+                data: {
+                    'category_id': category_id
+                },
+                success: function(data) {
+                    var subCategorys_select = $('#id_subcategoria');
+                    subCategorys_select.empty();
+                    subCategorys_select.append('<option value="">Selecione a Subcategoria</option>');
+                    $.each(data.subCategorys, function(index, subCategorys) {
+                        subCategorys_select.append('<option value="' + subCategorys.id + '">' + subCategorys.nome + '</option>');
+                    });
+                }
+            });
+        }
+    });
+});
+
+$(document).ready(function() {
+
+    var selectedData = [];
+
+    $('#id_subcategoria').change(function() {
+        var id_subcategoria = $(this).val();
+
+        if (id_subcategoria) {
+            $.ajax({
+                url: '/dashboard/get_procedures/',
+                data: {
+                    'subCategory_id': id_subcategoria
+                },
+                success: function(data) {
+                    var tabelaProcedures = $('#subcategoria-table tbody');
+                    tabelaProcedures.empty();
+
+                    $.each(data.procedures, function(index, procedure) {
+                        tabelaProcedures.append(
+                            '<tr>' +
+                                '<td>' + procedure.id + '</td>' +
+                                '<td>' + procedure.name + '</td>' +
+                                '<td><input type="checkbox" class="select-checkbox"></td>' +
+                                '<td><input type="number" class="price-input form-control" placeholder="Digite o preço"></td>' +
+                            '</tr>'
+                        );
+                    });
+                },
+                error: function() {
+                    alert('Erro ao carregar os dados. Por favor, tente novamente.');
+                }
+            });
+        } else {
+            $('#subcategoria-table tbody').empty();
+        }
+    });
+
+    // Submeter os dados e abrir o diálogo de pré-visualização
+    $('#submit-data').click(function() {
+
+        var isValid = true;
+
+        $('#subcategoria-table tbody tr').each(function() {
+            var checkbox = $(this).find('.select-checkbox');
+            var price = $(this).find('.price-input').val();
+            var id = $(this).find('td:nth-child(1)').text();
+            var name = $(this).find('td:nth-child(2)').text();
+
+            var category = $(this).find('td:nth-child(4)').text();
+            var subcategory = $(this).find('td:nth-child(5)').text();
+// console.log(category+'---'+subcategory)
+            if (checkbox.is(':checked')) {
+                if (!price || parseFloat(price) <= 0) {
+                    alert('Por favor, insira um preço válido para todos os itens selecionados.');
+                    isValid = false;
+                    return false;
+                }
+                selectedData.push({
+                    id: id,
+                    name: name,
+                    price: price
+                });
+            }
+        });
+
+        if (isValid && selectedData.length > 0) {
+            var previewTable = $('#preview-data');
+            previewTable.empty();
+
+            selectedData.forEach(function(item) {
+                previewTable.append(
+                    '<tr data-id="' + item.id + '">' +
+                        '<td>' + item.id + '</td>' +
+                        '<td>' + item.name + '</td>' +
+                        '<td>' + item.price + '</td>' +
+                        '<td><button type="button" class="remove_dignitary btn remove-item"> <i class="fa-solid fa-x"></i></button></td>' +
+                    '</tr>'
+                );
+            });
+
+            $('#prevProvedorModalModal').modal('show');
+
+        } else if (isValid && selectedData.length === 0) {
+            alert('Selecione ao menos um item para enviar.');
+        }
+    });
+
+    // Remover itens da tabela de pré-visualização
+    $(document).on('click', '.remove-item', function() {
+        $(this).closest('tr').remove();
+    });
+
+    // Fechar o diálogo
+    $('#close-dialog').click(function() {
+        $('#preview-dialog').css('display', 'none');
+    });
+
+    $('#submitFom').click(function () {
+        $('#procedures_data').val(JSON.stringify(selectedData));
+        $('#multiStepForm').submit();
+    });
+
+});
+
+
+</script>

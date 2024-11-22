@@ -1,11 +1,6 @@
-  <div class="container mb-4 mt-3">
-        <div class="date-selector rounded-pill">
-          Nov 16 - Jan 20, 2024
-          <i class="fas fa-chevron-down"></i>
-        </div>
-      </div>
+
       <!-- Summary Cards -->
-      <div class="row g-4">
+      <div class="row g-4 mt-4">
         <!-- Card 1 -->
         <div class="col-md-4">
           <div class="card-custom card-custom-cor-1">
@@ -13,8 +8,7 @@
               <i class="fa fa-ellipsis-v"></i>
             </div>
             <p class="pt-3">Provedores</p>
-            <h1 class="pt-3">27</h1>
-            <p>Último mês <span class="percentage-change  pt-3">-1%</span></p>
+            <h1 class="pt-3">{{ insurance_suppliers }}</h1>
           </div>
         </div>
 
@@ -24,9 +18,8 @@
             <div class="options-icon  pt-3">
               <i class="fa fa-ellipsis-v"></i>
             </div>
-            <p class="pt-3">Corporativos</p>
-            <h1 class="pt-3">7</h1>
-            <p>Último mês <span class="percentage-change pt-3">-</span></p>
+            <p class="pt-3">Clientes</p>
+            <h1 class="pt-3">{{ insurance_clients_all }}</h1>
           </div>
         </div>
       </div>
@@ -39,22 +32,21 @@
           <tr>
             <th>ID</th>
             <th>Nome da empresa</th>
-            <th>Tipo</th>
             <th>Contacto</th>
             <th>Endereço</th>
             <th>Detalhes</th>
           </tr>
           </thead>
           <tbody>
+          {% for client in insurance_clients %}
           <tr>
-            <td>001</td>
-            <td>EIKO</td>
-            <td><span class="badge bg-primary">Seguradora</span></td>
-            <td>84 140 1000</td>
-            <td>Bairro leão, Malhampsene</td>
-            <td><button class="btn btn-details"><i class="fa fa-eye"></i></button></td>
+            <td>{{ client.id }}</td>
+            <td>{{client.name}}</td>
+            <td>{{client.nuitNumber}}</td>
+            <td>{{client.address}}</td>
+            <td><a href="{% url 'client_show' id=client.id %}" class="btn btn-details"><i class="fa fa-eye"></i></a></td>
           </tr>
-          <!-- Repeat for other entries as needed -->
+          {% endfor %}
           </tbody>
         </table>
- </div>
+      </div>

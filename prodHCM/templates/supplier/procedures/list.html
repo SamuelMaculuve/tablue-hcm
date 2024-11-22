@@ -1,0 +1,29 @@
+{% extends "base/base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <div class="table-responsive">
+        <table class="table">
+        <thead class="table-custom">
+            <tr>
+                <th>ID</th>
+                <th>Procedimento</th>
+                <th>Preço Negociado</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for procedure in procedures %}
+                <tr>
+                    <td>{{ procedure.id }}</td>
+                    <td>{{ procedure.procedure.name }}</td>
+                    <td>{{ procedure.negotiated_price }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="3">Nenhum procedimento encontrado.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+{% endblock content %}

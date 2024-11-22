@@ -23,6 +23,7 @@ urlpatterns = [
     path('procedure/create/', views.procedures_form, name='procedures_form'),
     path('procedure/list/', views.procedures_list, name='procedures_list'),
     path('get_subcategorias/', views.get_subcategorias, name='get_subcategorias'),
+    path('get_procedures/', views.get_procedures, name='get_procedures'),
 
     #clients
     path('client/create/', views.client_form, name='client_form'),
@@ -36,8 +37,11 @@ urlpatterns = [
     #supplier
     path('supplier/create/', views.supplier_form, name='supplier_form'),
     path('supplier/list/', views.supplier_list, name='supplier_list'),
+    path('supplier/list/show/<int:id>/', views.supplier_show, name='supplier_show'),
     path('supplier/client/list/', views.supplier_client_list, name='supplier_client_list'),
     path('supplier/client/show/<int:id>/', views.supplier_client_show, name='supplier_client_show'),
+    path('supplier/procedures/', views.supplier_procedures, name='supplier_procedures'),
+
     path('save-procedures/', views.save_procedures, name='save_procedures'),
     path('search-suppliers/', views.search_suppliers, name='search_suppliers'),
 

@@ -17,7 +17,7 @@ from .models import InsuranceCompany, Procedure, Client, Supplier, InsurancePlan
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 import requests
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, HttpResponseForbidden
 
 
 def send_email(request,address,subject,html_content):
@@ -67,14 +67,50 @@ def custom_logout(request):
 def dashboard(request):
 
     if request.user.is_authenticated:
+        all_insurance = 0;all_insurance_company = 0;all_supplier = 0;insurance_suppliers = 0;insurance_clients_all = 0
+        supplier_insuranceCompanys = 0
+        insuranceCompany = [];insurance_clients = [];insuranceCompanys = []
 
-        # insuranceCompany = getattr(request.user, 'insuranceCompany', None)
         # clients = Client.objects.filter(insuranceCompany__id=insuranceCompany.id)
+
+        if request.user.groups.filter(name='Admin').exists():
+
+            all_insurance = InsuranceCompany.objects.filter(insuranceCompanyType=1).count()
+            all_insurance_company = InsuranceCompany.objects.filter(insuranceCompanyType=2).count()
+            all_supplier = Supplier.objects.count()
+            insuranceCompany = InsuranceCompany.objects.all()[:5]
+
+        elif request.user.groups.filter(name='InsuranceCompany').exists():
+
+            insuranceCompany = getattr(request.user, 'insuranceCompany', None)
+            insurance_clients = Client.objects.filter(insuranceCompany__id=insuranceCompany.id)[:5]
+            insurance_clients_all = Client.objects.filter(insuranceCompany__id=insuranceCompany.id).count()
+
+            company = InsuranceCompany.objects.get(id=insuranceCompany.id)
+            insurance_suppliers = company.supplier.all().count()
+
+        elif request.user.groups.filter(name='Supplier').exists():
+
+            supplier = getattr(request.user, 'supplier', None)
+            insuranceCompanys = supplier.insuranceCompany.all()
+            supplier_insuranceCompanys = supplier.insuranceCompany.count()
+
+        elif request.user.groups.filter(name='client').exists():
+            print('You are an admin!')
+        else:
+            return HttpResponseForbidden('Access denied.')
 
         context = {
             'title': 'Dashboard',
-            # 'nome_empresa': insuranceCompany,
-            # 'clients': clients
+            'all_insurance': all_insurance,
+            'all_insurance_company': all_insurance_company,
+            'all_supplier': all_supplier,
+            'insuranceCompany': insuranceCompany,
+            'insurance_clients': insurance_clients,
+            'insurance_suppliers': insurance_suppliers,
+            'insurance_clients_all': insurance_clients_all,
+            'insuranceCompanys': insuranceCompanys,
+            'supplier_insuranceCompanys': supplier_insuranceCompanys,
         }
 
         return render(request, 'dashboard.html', context)
@@ -212,6 +248,18 @@ def get_subcategorias(request):
     data = {
         'subCategorys': [{'id': sub.id, 'nome': sub.name} for sub in subCategorys]
     }
+
+    return JsonResponse(data)
+
+def get_procedures(request):
+
+    subCategory_id = request.GET.get('subCategory_id')
+    procedures = Procedure.objects.filter(subCategory_id=subCategory_id)
+
+    data = {
+        'procedures': [{'id': sub.id, 'name': sub.name} for sub in procedures]
+    }
+
     return JsonResponse(data)
 
 @login_required
@@ -613,7 +661,21 @@ def supplier_list(request):
         'title': 'Provedor',
         'suppliers' : Supplier.objects.all().order_by('-id')
     }
+
     return render(request, "supplier/list.html",context)
+
+def supplier_show(request,id=0):
+
+    supplier = Supplier.objects.get(id=id)
+    insuranceCompanyProcedure = supplier.insuranceCompanyProcedure.all()
+
+    context = {
+        'title': 'Provedor',
+        'supplier' : supplier,
+        'insuranceCompanyProcedure' : insuranceCompanyProcedure,
+    }
+
+    return render(request, "supplier/show.html",context)
 
 def supplier_client_list(request):
 
@@ -629,6 +691,11 @@ def supplier_client_list(request):
     return render(request, "supplier/client_list.html",context)
 
 def supplier_form(request, id=0):
+
+    insuranceCompany = getattr(request.user, 'insuranceCompany', None)
+
+    categorys = Category.objects.all()
+
     if request.method == "GET":
         if id == 0 :
             form = SupplierForm()
@@ -636,15 +703,25 @@ def supplier_form(request, id=0):
             supplier = Supplier.objects.get(pk=id)
             form = SupplierForm(instance = supplier)
 
+        category_id = request.GET.get('category_id')
+        subCategory_id = request.GET.get('subCategory_id')
+
+        if category_id and subCategory_id:
+            procedures = Procedure.objects.filter(subCategory_id=subCategory_id)
+        else:
+            procedures = Procedure.objects.none()
+
         context = {
             'title': 'Provedor',
-            'form': form
+            'form': form,
+            'categorys': categorys,
         }
-        return render(request, "supplier/create.html",context)
-
+        return render(request, "supplier/create.html", context)
     else:
 
         form = SupplierForm(request.POST, request.FILES)
+
+        data = json.loads(request.POST.get('procedures_data', '[]'))
 
         context = {
             'title': 'Criar novo Provedor',
@@ -652,12 +729,43 @@ def supplier_form(request, id=0):
         }
 
         if form.is_valid():
+
             supplier = form.save()
+
+            for procedure_data in data:
+                name = procedure_data.get('name')
+                price = procedure_data.get('price')
+                procedure_id = procedure_data.get('id')
+
+                # Verifica se o nome foi fornecido
+                if not name:
+                    return JsonResponse({'message': 'Nome do procedimento é obrigatório.'}, status=400)
+
+                # Busca ou cria o procedimento pelo nome
+                procedure = Procedure.objects.get(id=procedure_id)
+
+                # Cria ou atualiza o InsuranceCompanyProcedure
+                InsuranceCompanyProcedure.objects.update_or_create(
+                    insuranceCompany=insuranceCompany,
+                    supplier=supplier,
+                    procedure=procedure,
+                    defaults={
+                        'negotiated_price': price,
+                    }
+                )
             messages.success(request, 'Provedor criado com sucesso!')
-            return render(request, '/dashboard/supplier/list.html',context)
+
+            return redirect( '/dashboard/supplier/list/',context)
 
         else:
-            return render(request, 'supplier/create.html', {'form': form})
+
+            context = {
+                'title': 'Provedor',
+                'form': form,
+                'categorys': categorys,
+            }
+
+            return render(request, 'supplier/create.html', context)
 
 def supplier_client_show(request,id):
 
@@ -678,6 +786,19 @@ def supplier_client_show(request,id):
      }
 
     return render(request, 'supplier/client_show.html', context)
+
+def supplier_procedures(request):
+
+    supplier = getattr(request.user, 'supplier', None)
+
+    procedures = InsuranceCompanyProcedure.objects.filter(supplier=supplier)
+
+    context = {
+        'title': "Procedimentos",
+        'procedures': procedures,
+     }
+
+    return render(request, 'supplier/procedures/list.html', context)
 
 def send_beneficiaries_email(request,savedForm):
 

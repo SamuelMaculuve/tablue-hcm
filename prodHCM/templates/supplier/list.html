@@ -28,11 +28,11 @@
           <tbody>
           {% for supplier in suppliers %}
           <tr>
-            <td>{{ forloop.counter }}</td>
+            <td>{{ supplier.id }}</td>
             <td>{{ supplier.name}}</td>
             <td>{{ supplier.nuitNumber}}</td>
             <td>{{ supplier.address}}</td>
-            <td><button class="btn btn-details"><i class="fa fa-eye"></i></button></td>
+            <td><a href="{% url 'supplier_show' supplier.id %}" class="btn btn-details"><i class="fa fa-eye"></i></a></td>
           </tr>
           {% endfor %}
           </tbody>

@@ -37,7 +37,7 @@ class Supplier(models.Model):
     contractFile = models.FileField(upload_to='static/img/supplierContracts/')
     nuitFile = models.FileField(upload_to='static/img/supplierNuits/')
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True, related_name='supplier')
-    # procedure = models.ManyToManyField(Procedure, blank=True)
+    # procedure = models.ManyToManyField(Procedure, null=True, blank=True, related_name='supplier')
 
     def save(self, *args, **kwargs):
         if not self.user:
@@ -95,13 +95,13 @@ class InsuranceCompany(models.Model):
         return self.name
 
 class InsuranceCompanyProcedure(models.Model):
-    insuranceCompany = models.ForeignKey(InsuranceCompany, on_delete=models.CASCADE)
-    supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE,null=True, blank=True)
+    insuranceCompany = models.ForeignKey(InsuranceCompany, on_delete=models.CASCADE,null=True, blank=True,related_name='insuranceCompanyProcedure')
+    supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE,null=True, blank=True,related_name='insuranceCompanyProcedure')
     negotiated_price = models.DecimalField("Preço Negociado", max_digits=10, decimal_places=2)
     procedure = models.ForeignKey(Procedure, on_delete=models.CASCADE,null=True, blank=True)
 
-    class Meta:
-        unique_together = ('insuranceCompany', 'supplier', 'procedure')
+    # class Meta:
+    #     unique_together = ('insuranceCompany', 'supplier', 'procedure')
 
     def __str__(self):
         return f"{self.insuranceCompany} - {self.supplier} - {self.procedure} - {self.negotiated_price}"
@@ -174,8 +174,8 @@ class Beneficiaries(models.Model):
 class BeneficiarieTreatment(models.Model):
     beneficiarie = models.ForeignKey(Beneficiaries, on_delete=models.CASCADE, related_name='beneficiarieTreatment')
     procedure = models.ForeignKey(Procedure, on_delete=models.CASCADE, null=True, blank=True, related_name='beneficiarieTreatment')
-    created_at = models.DateTimeField(auto_now_add=True)  # Automatically sets the creation date
-    updated_at = models.DateTimeField(auto_now=True)      # Automatically updates the timestamp on save
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"Treatment for {self.beneficiarie} - {self.procedure}"

@@ -17,7 +17,7 @@ from .models import InsuranceCompany, Procedure, Client, Supplier, InsurancePlan
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 import requests
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, HttpResponseForbidden
 
 
 def send_email(request,address,subject,html_content):
@@ -67,14 +67,50 @@ def custom_logout(request):
 def dashboard(request):
 
     if request.user.is_authenticated:
+        all_insurance = 0;all_insurance_company = 0;all_supplier = 0;insurance_suppliers = 0;insurance_clients_all = 0
+        supplier_insuranceCompanys = 0
+        insuranceCompany = [];insurance_clients = [];insuranceCompanys = []
 
-        # insuranceCompany = getattr(request.user, 'insuranceCompany', None)
         # clients = Client.objects.filter(insuranceCompany__id=insuranceCompany.id)
+
+        if request.user.groups.filter(name='Admin').exists():
+
+            all_insurance = InsuranceCompany.objects.filter(insuranceCompanyType=1).count()
+            all_insurance_company = InsuranceCompany.objects.filter(insuranceCompanyType=2).count()
+            all_supplier = Supplier.objects.count()
+            insuranceCompany = InsuranceCompany.objects.all()[:5]
+
+        elif request.user.groups.filter(name='InsuranceCompany').exists():
+
+            insuranceCompany = getattr(request.user, 'insuranceCompany', None)
+            insurance_clients = Client.objects.filter(insuranceCompany__id=insuranceCompany.id)[:5]
+            insurance_clients_all = Client.objects.filter(insuranceCompany__id=insuranceCompany.id).count()
+
+            company = InsuranceCompany.objects.get(id=insuranceCompany.id)
+            insurance_suppliers = company.supplier.all().count()
+
+        elif request.user.groups.filter(name='Supplier').exists():
+
+            supplier = getattr(request.user, 'supplier', None)
+            insuranceCompanys = supplier.insuranceCompany.all()
+            supplier_insuranceCompanys = supplier.insuranceCompany.count()
+
+        elif request.user.groups.filter(name='client').exists():
+            print('You are an admin!')
+        else:
+            return HttpResponseForbidden('Access denied.')
 
         context = {
             'title': 'Dashboard',
-            # 'nome_empresa': insuranceCompany,
-            # 'clients': clients
+            'all_insurance': all_insurance,
+            'all_insurance_company': all_insurance_company,
+            'all_supplier': all_supplier,
+            'insuranceCompany': insuranceCompany,
+            'insurance_clients': insurance_clients,
+            'insurance_suppliers': insurance_suppliers,
+            'insurance_clients_all': insurance_clients_all,
+            'insuranceCompanys': insuranceCompanys,
+            'supplier_insuranceCompanys': supplier_insuranceCompanys,
         }
 
         return render(request, 'dashboard.html', context)

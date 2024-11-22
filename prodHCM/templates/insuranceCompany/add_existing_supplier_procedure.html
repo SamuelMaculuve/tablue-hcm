@@ -59,13 +59,11 @@
                         <td>{{ procedure.name }}</td>
                         <td>
                             <input type="checkbox" class="procedure-checkbox"
-                                   {% if procedure.id in saved_procedures_ids %}
-                                        checked
-                                   {% endif %}
+                                   
                                    value="{{ procedure.id }}">
                         </td>
                         <td>
-                            <input type="text" class="negotiated-price form-control" value="{% if procedure.id in saved_procedures_ids %}{{ procedure.negotiated_price }}{% else %}0{% endif %}"> <!-- Preço negociado editável -->
+                            <input type="text" class="negotiated-price form-control">
                         </td>
                     </tr>
                 {% endfor %}
@@ -73,58 +71,127 @@
         </table>
 
         <!-- Botão para salvar -->
-        <button type="button" id="save-button" class="btn">Salvar</button>
+<!--        <button type="button" id="save-button" class="btn">Salvar</button>-->
+        <button type="button" id="showModalBtn" class="btn btn-primary">Save</button>
+
     </form>
 </div>
-      </div>
-    </div>
-
+</div>
+</div>
 <script>
-        // Função JavaScript para capturar os IDs dos checkboxes selecionados e o preço negociado
-        document.addEventListener("DOMContentLoaded", function () {
-            document.getElementById("save-button").addEventListener("click", function (event) {
-                event.preventDefault(); // Impede o envio padrão do formulário
+    // Aguarda o carregamento completo da página
+    document.addEventListener('DOMContentLoaded', function () {
+      // Seleciona o modal pelo ID
+      var myModal = new bootstrap.Modal(document.getElementById('confirmationModal'));
 
-                // Coletar os IDs dos checkboxes marcados e os preços negociados
-                const selectedProcedures = Array.from(
-                    document.querySelectorAll(".procedure-checkbox:checked")
-                ).map(checkbox => {
-                    const row = checkbox.closest('tr');
-                    const negotiatedPrice = row.querySelector(".negotiated-price").value; // Captura o preço negociado
-                    return {
-                        procedure_id: checkbox.value,
-                        negotiated_price: negotiatedPrice
-                    };
-                });
+      // Abre o modal
+      // myModal.show();
+    });
+</script>
 
-                if (selectedProcedures.length === 0) {
-                    alert("Selecione pelo menos um procedimento.");
-                    return;
-                }
+<div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmationModalLabel">Confirm Your Selection</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <table class="table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Price</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="selectedProcurementsTable">
+                            <!-- Selected procurements will be inserted here -->
+                        </tbody>
+                    </table>
+                <p><strong>Do you want to save these procurements?</strong></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmSaveBtn">Yes, Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+ <script>
+        // JavaScript to handle modal and procurement selection
+        document.getElementById('showModalBtn').addEventListener('click', function() {
+            // Get all selected procurements (checked checkboxes)
+            const selectedProcurements = document.querySelectorAll('input.procedure-checkbox:checked');
+            
+            if (selectedProcurements.length === 0) {
+                alert('Please select at least one procurement.');
+                return;
+            }
 
-                // Fazer a requisição AJAX
-                fetch("{% url 'save_procedures' %}", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRFToken": "{{ csrf_token }}"
-                    },
-                    body: JSON.stringify({
-                        procedures: selectedProcedures,
-                        insurance_company_id: document.getElementById("insurance-company-id").value,
-                        supplier_id: document.getElementById("supplier-id").value
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert("Procedimentos salvos com sucesso!");
-                    } else {
-                        alert(data.error || "Erro ao salvar procedimentos.");
-                    }
-                })
-                .catch(error => console.error("Erro na requisição:", error));
+            // Prepare the table to show in the modal
+            const selectedProcurementsTable = document.getElementById('selectedProcurementsTable');
+            selectedProcurementsTable.innerHTML = ''; // Clear any previous content
+
+            selectedProcurements.forEach(procurement => {
+                const row = procurement.closest('tr');
+                const id = row.cells[0].innerText;  // ID from the first cell
+                const name = row.cells[1].innerText;  // Name from the second cell
+                const priceInput = row.cells[2].querySelector('.negotiated-price');
+                console.log(row.cells[2].querySelector('.negotiated-price'))
+                const price = priceInput.value;
+
+                // Create a table row for each selected procurement
+                const tableRow = document.createElement('tr');
+                tableRow.innerHTML = `
+                    <td>${id}</td>
+                    <td>${name}</td>
+                    <td>${price}</td>
+                    <td><button type="button" class="btn btn-danger remove-btn">Remove</button></td>
+                `;
+
+                // Add the table row to the modal's table
+                selectedProcurementsTable.appendChild(tableRow);
             });
+
+            // Show the modal
+            const modal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+            modal.show();
+        });
+
+        // Handle "Remove" button click
+        document.getElementById('confirmationModal').addEventListener('click', function(event) {
+            if (event.target && event.target.classList.contains('remove-btn')) {
+                // Remove the corresponding row from the modal
+                event.target.closest('tr').remove();
+            }
+        });
+
+        // Handle saving the selected procurements
+        document.getElementById('confirmSaveBtn').addEventListener('click', function() {
+            const rows = document.querySelectorAll('#selectedProcurementsTable tr');
+            
+            if (rows.length === 0) {
+                alert('No procurements selected to save.');
+                return;
+            }
+
+            // Collect the selected procurement details
+            const selectedItems = [];
+            rows.forEach(row => {
+                const id = row.cells[0].innerText;
+                const name = row.cells[1].innerText;
+                const price = row.cells[2].innerText;
+
+                selectedItems.push({ id, name, price });
+            });
+
+            console.log('Saving selected procurements:', selectedItems);
+
+            // You can replace the console log with a form submission to save the data
+
+            alert('Procurements saved successfully!');
         });
     </script>
 {% endblock content %}

@@ -25,11 +25,7 @@
                         <td>{{ procedure.id }}</td>
                         <td>{{ procedure.name }}</td>
                         <td>
-                            <input type="checkbox" class="procedure-checkbox"
-                                   {% if procedure.id in saved_procedures_ids %}
-                                        checked
-                                   {% endif %}
-                                   value="{{ procedure.id }}">
+                            <input type="checkbox" class="procedure-checkbox" value="{{ procedure.id }}">
                         </td>
 
                     </tr>
@@ -38,8 +34,8 @@
         </table>
 
         <!-- Botão para salvar -->
-        <button type="button" id="save-button" class="btn">Continuar</button>
-         <div class="modal fade" id="beneficiariosModalModal" tabindex="-1" aria-labelledby="beneficiariosModalModalLabel" aria-hidden="true">
+        <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#beneficiariosModalModal">Continuar</button>
+       <div class="modal fade" id="beneficiariosModalModal" tabindex="-1" aria-labelledby="beneficiariosModalModalLabel" aria-hidden="true">
      <div class="modal-dialog modal-fullscreen">
          <div class="modal-content">
                       <div class="modal-header">
@@ -50,30 +46,26 @@
                          <div class="iframe-container">
                             <iframe class="embed-responsive-item"  allow="camera; microphone"  src="https://fnbsdk.tablu.tech?id=ggpsz4PAG1yCQlqaXR3O372" allowfullscreen></iframe>
                         </div>
-                        <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                <button type="button" class="btn btn-primary">Send message</button>
-                           </div>
+
                       </div>
          </div>
      </div>
 </div>
 
-      <script>
+    </form>
+</div>
+      </div>
+    </div>
+<script>
     // Aguarda o carregamento completo da página
     document.addEventListener('DOMContentLoaded', function () {
       // Seleciona o modal pelo ID
       var myModal = new bootstrap.Modal(document.getElementById('beneficiariosModalModal'));
 
       // Abre o modal
-      myModal.show();
+      // myModal.show();
     });
 </script>
-    </form>
-</div>
-      </div>
-    </div>
-
 <script>
         // Função JavaScript para capturar os IDs dos checkboxes selecionados e o preço negociado
         document.addEventListener("DOMContentLoaded", function () {

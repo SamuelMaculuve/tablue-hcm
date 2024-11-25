@@ -3,7 +3,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.forms import modelformset_factory
 
 from prodHCM.models import InsuranceCompany, Procedure, Category, Client, Supplier, InsurancePlan, \
-    InsuranceCompanyProcedure, BeneficiarieTreatment, Beneficiaries, SubCategory
+    InsuranceCompanyProcedure, BeneficiarieTreatment, Beneficiaries, SubCategory, Individuals
 
 
 class CustomLoginForm(AuthenticationForm):
@@ -106,10 +106,10 @@ class SupplierForm(forms.ModelForm):
             'procedures': forms.CheckboxSelectMultiple(),
         }
 
-        def clean_procedures(self):
-            # If no procedures are selected, return an empty list
-            procedure = self.cleaned_data.get('procedures', [])
-            return procedures
+        # def clean_procedures(self):
+        #     # If no procedures are selected, return an empty list
+        #     procedure = self.cleaned_data.get('procedures', [])
+        #     return procedures
 
 class BeneficiarieTreatmentForm(forms.ModelForm):
     class Meta:
@@ -126,6 +126,17 @@ class BeneficiariesForm(forms.ModelForm):
         fields = ('insuranceCompany','client','name','email','insurancePlan')
         widgets = {
             'client': forms.HiddenInput(),
+            'insuranceCompany': forms.HiddenInput(),
+        }
+        labels = {
+            'insurancePlan': 'Plano',
+        }
+
+class IndividualsForm(forms.ModelForm):
+    class Meta:
+        model = Individuals
+        fields = ('insuranceCompany','name','email','insurancePlan')
+        widgets = {
             'insuranceCompany': forms.HiddenInput(),
         }
         labels = {

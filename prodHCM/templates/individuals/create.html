@@ -7,10 +7,9 @@
     <form action="" method="post" autocomplete="off" enctype="multipart/form-data">
     {% csrf_token %}
     <input name="insuranceCompany" value="{{ insuranceCompany.id }}" type="hidden">
-    <input name="client" value="{{ client.id }}" type="hidden">
 
     <!-- Input Oculto para Armazenar Beneficiários -->
-    <input type="hidden" name="beneficiaries" id="beneficiariesData" value="[]">
+    <input type="hidden" name="individuals" id="individualsData" value="[]">
 
     <!-- Campos do Formulário -->
     <div class="row mt-4">
@@ -39,17 +38,17 @@
                     <th>Ações</th>
                 </tr>
             </thead>
-            <tbody id="beneficiariesTableBody">
+            <tbody id="individualsTableBody">
             </tbody>
         </table>
     </div>
 
     <!-- Botão para Salvar -->
-    <button type="submit" class="btn btn-primary mt-4">Salvar Beneficiários</button>
+    <button type="submit" class="btn btn-primary mt-4">Salvar</button>
 </form>
 <script>
     // Array para armazenar beneficiários
-let beneficiaries = [];
+let individuals = [];
 
 // Botão de adicionar beneficiário
 document.getElementById('addBeneficiary').addEventListener('click', function () {
@@ -74,13 +73,13 @@ document.getElementById('addBeneficiary').addEventListener('click', function () 
     };
 
     // Adicionar beneficiário ao array
-    beneficiaries.push(newBeneficiary);
+    individuals.push(newBeneficiary);
 
     // Atualizar o campo oculto
-    updateBeneficiariesInput();
+    updateindividualsInput();
 
     // Adicionar linha na tabela
-    const tableBody = document.getElementById('beneficiariesTableBody');
+    const tableBody = document.getElementById('individualsTableBody');
     const row = `
         <tr id="row-${newBeneficiary.id}">
             <td>${newBeneficiary.name}</td>
@@ -106,16 +105,16 @@ function removeBeneficiary(id) {
     if (row) row.remove();
 
     // Remover do array
-    beneficiaries = beneficiaries.filter(beneficiary => beneficiary.id !== id);
+    individuals = individuals.filter(beneficiary => beneficiary.id !== id);
 
     // Atualizar o campo oculto
-    updateBeneficiariesInput();
+    updateindividualsInput();
 }
 
 // Atualizar o campo oculto com os dados do array
-function updateBeneficiariesInput() {
-    const input = document.getElementById('beneficiariesData');
-    input.value = JSON.stringify(beneficiaries);
+function updateindividualsInput() {
+    const input = document.getElementById('individualsData');
+    input.value = JSON.stringify(individuals);
 }
 
 </script>

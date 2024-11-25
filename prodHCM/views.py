@@ -11,9 +11,9 @@ from django.utils.html import strip_tags
 
 from .forms import CustomLoginForm, InsuranceCompanyFrom, ProceduresFrom, ClientsForm, SupplierForm, \
     AddSupplierToInsuranceFrom, InsurancePlanForm, InsuranceCompanyProcedureForm, \
-    InsuranceCompanyProcedureFormSet, AddInsurancePlanClientFrom, BeneficiariesForm
+    InsuranceCompanyProcedureFormSet, AddInsurancePlanClientFrom, BeneficiariesForm, IndividualsForm
 from .models import InsuranceCompany, Procedure, Client, Supplier, InsurancePlan, InsuranceCompanyProcedure, \
-    Beneficiaries, BeneficiarieTreatment, Category, SubCategory
+    Beneficiaries, BeneficiarieTreatment, Category, SubCategory, Individuals
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 import requests
@@ -845,40 +845,30 @@ def send_beneficiaries_email(request,savedForm):
     except requests.RequestException as e:
         print("Erro na requisição:", e)
 
-def beneficiarie_client_create(request,client_id=0):
-
+def beneficiarie_client_create(request, client_id=0):
     client = get_object_or_404(Client, id=client_id)
     insuranceCompany = getattr(request.user, 'insuranceCompany', None)
     beneficiaries = client.beneficiaries.all().order_by('-id')
 
-    if request.method == "GET":
-        if id == 0 :
-            form = BeneficiariesForm()
-            # form.fields['insurancePlan'].queryset = client.insurancePlan.all().order_by('-id')
-            print("UES")
-            print(client)
-        else:
-            form = BeneficiariesForm()
-            # form.fields['insurancePlan'].queryset = client.insurancePlan.all().order_by('-id')
-            print("UE====S")
-            print(client.insurancePlan.all())
-            print("UE=333===S")
-        context = {
-            'title': 'Adicionar beneficiário',
-            'form': form,
-            'insuranceCompany': insuranceCompany,
-            'client': client,
-            'beneficiaries': beneficiaries,
-        }
+    if request.method == "POST":
+        beneficiaries_data = request.POST.get('beneficiaries', '[]')
+        beneficiaries = json.loads(beneficiaries_data)
+        print(beneficiaries)
+        for beneficiaries in beneficiaries:
+            savedForm = Beneficiaries.objects.create(
+                client=client,
+                name=beneficiaries['name'],
+                email=beneficiaries['email'],
+                insurancePlan_id=beneficiaries['insurancePlan'],
+                insuranceCompany=insuranceCompany
+            )
+            send_beneficiaries_email(request, savedForm)
 
-        return render(request, "clients/beneficiaries/create.html",context)
+        messages.success(request, 'Beneficiários adicionados com sucesso!')
+        return redirect(f'/dashboard/client/{client.id}')
 
     else:
-
-        form = BeneficiariesForm(request.POST, request.FILES)
-        # form.fields['insurancePlan'].queryset =  client.insurancePlan.all().order_by('-id')
-
-        print(client.insurancePlan.all())
+        form = BeneficiariesForm()
         context = {
             'title': 'Adicionar beneficiário',
             'form': form,
@@ -886,27 +876,58 @@ def beneficiarie_client_create(request,client_id=0):
             'client': client,
             'beneficiaries': beneficiaries,
         }
+        return render(request, "clients/beneficiaries/create.html", context)
 
-        if form.is_valid():
+def individual_form(request):
 
-            savedForm = form.save()
+    insuranceCompany = getattr(request.user, 'insuranceCompany', None)
 
-            send_beneficiaries_email(request,savedForm)
+    if request.method == "POST":
+        individuals_data = request.POST.get('individuals', '[]')
+        individuals = json.loads(individuals_data)
+        print(individuals)
 
-            messages.success(request, 'Beneficiários criado com sucesso!')
-            return redirect('/dashboard/client/beneficiaries/create/'+str(client.id),context)
+        for individuals in individuals:
+            savedForm = Individuals.objects.create(
+                name=individuals['name'],
+                email=individuals['email'],
+                insurancePlan_id=individuals['insurancePlan'],
+                insuranceCompany=insuranceCompany
+            )
+            send_beneficiaries_email(request, savedForm)
 
-        else:
+        individuals = insuranceCompany.individuals.all()
 
-            context = {
-                'title': 'Adicionar beneficiário',
-                'form': form,
-                'insuranceCompany': insuranceCompany,
-                'client': client,
-                'beneficiaries': beneficiaries,
-            }
+        context = {
+            'title': "Indivíduos",
+            'individuals': individuals,
+            'insuranceCompany': insuranceCompany,
+        }
+        messages.success(request, 'Adicionados com sucesso!',context)
+        return redirect('/dashboard/individuals/list/',context)
 
-            return render(request, 'supplier/client_create.html', context)
+    else:
+        form = IndividualsForm()
+        context = {
+            'title': 'Adicionar Indivíduos',
+            'form': form,
+            'insuranceCompany': insuranceCompany,
+        }
+        return render(request, "individuals/create.html", context)
+
+def individual_list(request):
+
+    insuranceCompany = getattr(request.user, 'insuranceCompany', None)
+
+    individuals = insuranceCompany.individuals.all()
+
+    context = {
+        'title': "Indivíduos",
+        'individuals': individuals,
+        'insuranceCompany': insuranceCompany,
+    }
+
+    return render(request, 'individuals/list.html', context)
 
 def get_session_data(request,client):
 
@@ -1004,17 +1025,20 @@ def treatment_form(request, id=0):
 
 def treatment_show(request):
 
-    beneficiarie = Beneficiaries.objects.get(pk=request.POST['id'])
-    client = beneficiarie.client
+    procedures = Procedure.objects.all()
+    beneficiarie = []
+    try:
+        beneficiarie = Beneficiaries.objects.get(pk=request.POST['id'])
+    except Beneficiaries.DoesNotExist:
+        messages.error(request, f'Beneficiario não encontrado')
+        return redirect(request.META.get('HTTP_REFERER', '/'))
 
-    procedures = Procedure.objects.all();
 
     context = {
-      'title': beneficiarie.name,
-      'beneficiarie': beneficiarie,
-      'procedures': procedures,
-      'client': client,
-     }
+        'title': beneficiarie.name,
+        'beneficiarie': beneficiarie,
+        'procedures': procedures,
+    }
 
     return render(request, 'treatment/show.html', context)
 

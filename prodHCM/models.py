@@ -155,7 +155,7 @@ class Client(models.Model):
 
 
 class Beneficiaries(models.Model):
-    name = models.CharField("Nome da Completo",max_length=255)
+    name = models.CharField("Nome da Completo",max_length=255,null=True, blank=True)
     nuitNumber = models.CharField("NUIT",max_length=15, null=True, blank=True)
     phoneNumber = models.CharField("Número de celular",max_length=15, null=True, blank=True)
     date_of_activity_start = models.DateField("Início de actividade", null=True, blank=True)
@@ -166,7 +166,23 @@ class Beneficiaries(models.Model):
     session_id = models.CharField("session_id",max_length=100,null=True, blank=True)
     client = models.ForeignKey(Client, on_delete=models.CASCADE, null=True, blank=True, related_name='beneficiaries')
     insuranceCompany = models.ForeignKey(InsuranceCompany, on_delete=models.CASCADE, null=True, blank=True, related_name='beneficiaries')
-    insurancePlan = models.ForeignKey(InsurancePlan, on_delete=models.CASCADE, related_name='beneficiaries')
+    insurancePlan = models.ForeignKey(InsurancePlan, on_delete=models.CASCADE, related_name='beneficiaries',null=True, blank=True)
+
+    def __str__(self):
+        return self.name
+
+class Individuals(models.Model):
+    name = models.CharField("Nome da Completo",max_length=255,null=True, blank=True)
+    nuitNumber = models.CharField("NUIT",max_length=15, null=True, blank=True)
+    phoneNumber = models.CharField("Número de celular",max_length=15, null=True, blank=True)
+    date_of_activity_start = models.DateField("Início de actividade", null=True, blank=True)
+    email = models.CharField("Email",max_length=100, null=True, blank=True)
+    address = models.CharField("Endereço",max_length=100, null=True, blank=True)
+    district = models.CharField("Distrito",max_length=100, null=True, blank=True)
+    province = models.CharField("Provincia",max_length=100, null=True, blank=True)
+    session_id = models.CharField("session_id",max_length=100,null=True, blank=True)
+    insuranceCompany = models.ForeignKey(InsuranceCompany, on_delete=models.CASCADE, null=True, blank=True, related_name='individuals')
+    insurancePlan = models.ForeignKey(InsurancePlan, on_delete=models.CASCADE, related_name='individuals',null=True, blank=True)
 
     def __str__(self):
         return self.name

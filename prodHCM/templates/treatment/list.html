@@ -31,14 +31,8 @@
           </thead>
           <tbody>
           {% for beneficiaries in beneficiaries %}
-          <tr>
-            <td>{{ beneficiaries.id }}</td>
-            <td>{{ beneficiaries.name}}</td>
-            <td>{{ beneficiaries.nuitNumber}}</td>
-            <td>{{ beneficiaries.address}}</td>
-            <td><a href="#" class="btn btn-details"><i class="fa fa-eye"></i></a></td>
-          </tr>
-          {% endfor %}
+
+          {% endfor %}2
           </tbody>
         </table>
       </div>
@@ -47,14 +41,15 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
+          <h3 style="font-weight: 400;font-size: 25px;">Dados para aprovação</h3>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <h3 style="font-weight: 400;font-size: 25px;">Dados para aprovação</h3>
+
          <form id="procedure-form" method="POST" action="{% url 'treatment_show' %}">
               {% csrf_token %}
-               <input type="text" class="form-control" name="id" placeholder="ID do Membro">
-             <button class="btn register-button mt-3" type="submit">Proximo</button>
+               <input type="number" class="form-control" name="id" placeholder="ID do Membro" required>
+             <button class="btn register-button mt-3" type="submit">Próximo</button>
         </form>
         </div>
       </div>

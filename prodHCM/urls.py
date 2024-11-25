@@ -26,6 +26,9 @@ urlpatterns = [
     path('get_procedures/', views.get_procedures, name='get_procedures'),
 
     #clients
+    path('individuals/create/', views.individual_form, name='individual_form'),
+    path('individuals/list/', views.individual_list, name='individual_list'),
+
     path('client/create/', views.client_form, name='client_form'),
     path('client/list/', views.client_list, name='client_list'),
     path('client/<int:id>/', views.client_show, name='client_show'),

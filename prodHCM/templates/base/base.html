@@ -188,9 +188,16 @@
               <i class="fas fa-briefcase-medical"></i> Planos
             </a>
 
-            <a href="{% url 'insurance_supplier_list' %}" class="nav-link {% if request.path == '/dashboard/insurance/supplier/list/' %} active{% endif %} d-flex align-items-center px-3 py-2">
+            <a href="{% url 'insurance_supplier_list' %}" class="nav-link {% if request.path == '/dashboard/individuals/list/' %} active{% endif %} d-flex align-items-center px-3 py-2">
               <i class="fas fa-briefcase-medical"></i> Provedores
             </a>
+
+            {% if insuranceCompany.insuranceCompanyType.id == 2 %}
+                <a href="{% url 'individual_list' %}" class="nav-link {% if request.path == '/dashboard/insurance/supplier/list/' %} active{% endif %} d-flex align-items-center px-3 py-2">
+              <i class="fas fa-user"></i> Indivíduos
+            </a>
+            {% endif %}
+
         {% endif %}
 
         {% if user.groups.all.0.name == "Supplier" %}

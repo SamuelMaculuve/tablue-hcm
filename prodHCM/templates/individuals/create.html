@@ -23,6 +23,12 @@
             {{ form.insurancePlan|as_crispy_field }}
         </div>
         <div class="col-md-3">
+            {{ form.percentageParticipation|as_crispy_field }}
+        </div>
+        <div class="col-md-3">
+            {{ form.phoneNumber|as_crispy_field }}
+        </div>
+        <div class="col-md-2">
             <button type="button" class="btn btn-dark mt-4" id="addBeneficiary">Adicionar</button>
         </div>
     </div>
@@ -34,7 +40,8 @@
                 <tr>
                     <th>Nome</th>
                     <th>Email</th>
-                    <th>Plano de Seguro</th>
+                    <th>Número de celular</th>
+                     <th>Plano de Seguro</th>
                     <th>Ações</th>
                 </tr>
             </thead>
@@ -56,6 +63,7 @@ document.getElementById('addBeneficiary').addEventListener('click', function () 
     const name = document.querySelector('[name="name"]').value;
     const email = document.querySelector('[name="email"]').value;
     const insurancePlan = document.querySelector('[name="insurancePlan"]').value;
+    const phoneNumber = document.querySelector('[name="phoneNumber"]').value;
     const insurancePlanText = document.querySelector('[name="insurancePlan"] option:checked').text;
 
     // Validar campos
@@ -70,6 +78,7 @@ document.getElementById('addBeneficiary').addEventListener('click', function () 
         email: email,
         insurancePlan: insurancePlan,
         insurancePlanText: insurancePlanText,
+        phoneNumber: phoneNumber,
     };
 
     // Adicionar beneficiário ao array
@@ -84,6 +93,7 @@ document.getElementById('addBeneficiary').addEventListener('click', function () 
         <tr id="row-${newBeneficiary.id}">
             <td>${newBeneficiary.name}</td>
             <td>${newBeneficiary.email}</td>
+            <td>${newBeneficiary.phoneNumber}</td>
             <td>${newBeneficiary.insurancePlanText}</td>
             <td>
                 <button type="button" class="remove_dignitary btn btn-remove" onclick="removeBeneficiary(${newBeneficiary.id})"><i class="fa-solid fa-x"></i></button>

@@ -1,13 +1,36 @@
 {% extends "base/base.html" %}
 {% load crispy_forms_tags %}
 {% block content %}
+<style>
+  .card-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .card-title {
+    font-size: 1.2rem;
+  }
+
+  .card-text {
+    font-size: 0.9rem;
+  }
+
+  .row-cols-md-2 .col {
+    margin-bottom: 10px;
+  }
+
+  #categoryList, #subcategoryList {
+    margin-top: 10px;
+  }
+</style>
 
  {% include "includes/sucess_modal_dialog.html" %}
 
     <form action="" method="post" autocomplete="off" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="row mt-4">
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <label class="form-label requiredField">
                 Categoria<span class="asteriskField">*</span>
                 </label>
@@ -32,14 +55,83 @@
             </label>
                 <input type="text" name="name" maxlength="255" class="textinput form-control" required="" id="procedure_name">
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
+              <label class="form-label requiredField">
+                Código<span class="asteriskField">*</span>
+            </label>
+                <input type="text" name="prodCode" maxlength="255" class="form-control" required="" id="id_prodCode">
+            </div>
+            <div class="col-md-2">
               <button type="button" class="btn btn-dark mt-4" id="add_procedures">Adicionar</button>
             </div>
         </div>
     </form>
       <div class="container mt-3 mb-3">
-        <a href="#" class="add-category-link">Adicionar nova categoria ➔</a>
+        <a href="{% url 'category_list' %}" class="add-category-link">Adicionar nova categoria ➔</a>
+<!--        <a href="#" class="add-category-link" data-bs-toggle="modal" data-bs-target="#categoryModal">Adicionar nova categoria ➔</a>-->
       </div>
+
+<!-- Modal -->
+<div class="modal fade" id="categoryModal" tabindex="-1" aria-labelledby="categoryModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="categoryModalLabel">Categoria e Subcategoria</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Tabs Navigation -->
+        <ul class="nav nav-tabs" id="categoryTab" role="tablist">
+          <li class="nav-item" role="presentation">
+            <a class="nav-link active" id="category-tab" data-bs-toggle="tab" href="#category" role="tab" aria-controls="category" aria-selected="true">Category</a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a class="nav-link" id="subcategory-tab" data-bs-toggle="tab" href="#subcategory" role="tab" aria-controls="subcategory" aria-selected="false">Subcategory</a>
+          </li>
+        </ul>
+
+        <!-- Tabs Content -->
+        <div class="tab-content" id="categoryTabContent">
+          <!-- Category Tab -->
+          <div class="tab-pane fade show active" id="category" role="tabpanel" aria-labelledby="category-tab">
+            <h5>Category Content</h5>
+            <form>
+
+            </form>
+
+            <h5>Category List</h5>
+            <div class="row row-cols-1 row-cols-md-2 g-4" id="categoryList" style="max-height: 300px; overflow-y: auto;">
+              <!-- Category Cards will appear here -->
+            </div>
+          </div>
+
+          <!-- Subcategory Tab -->
+          <div class="tab-pane fade" id="subcategory" role="tabpanel" aria-labelledby="subcategory-tab">
+            <form>
+              <div class="mb-3">
+                <label for="subcategoryName" class="form-label">Subcategory Name</label>
+                <input type="text" class="form-control" id="subcategoryName" placeholder="Enter subcategory name">
+              </div>
+              <div class="mb-3">
+                <label for="subcategoryDescription" class="form-label">Description</label>
+                <textarea class="form-control" id="subcategoryDescription" rows="3" placeholder="Enter subcategory description"></textarea>
+              </div>
+            </form>
+
+            <h5>Subcategory List</h5>
+            <div class="row row-cols-1 row-cols-md-2 g-4" id="subcategoryList" style="max-height: 300px; overflow-y: auto;">
+              <!-- Subcategory Cards will appear here -->
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
       <!-- Companies Table -->
     <div class="table-responsive">
         <table class="table" id="procedures_table" >
@@ -48,6 +140,7 @@
             <th>Categoria</th>
             <th>Sub-categoria</th>
             <th>Procedimento</th>
+            <th>Código</th>
             <th></th>
           </tr>
           </thead>
@@ -116,6 +209,7 @@ $(document).ready(function () {
         const categoryName = $('#categoria_id option:selected').text();
         const subcategoryId = $('#id_subcategoria').val();
         const subcategoryName = $('#id_subcategoria option:selected').text();
+        const prodCode = $('#id_prodCode').val();
         const dignitaryName = $('#procedure_name').val();
 
         if (!categoryId || !subcategoryId || !dignitaryName) {
@@ -129,6 +223,7 @@ $(document).ready(function () {
                 <td>${categoryName}</td>
                 <td>${subcategoryName}</td>
                 <td>${dignitaryName}</td>
+                <td>${prodCode}</td>
                 <td><button type="button" class="remove_dignitary btn btn-remove"> <i class="fa-solid fa-x"></i></button></td>
             </tr>`;
         $('#procedures_table tbody').append(newRow);
@@ -137,7 +232,8 @@ $(document).ready(function () {
         procedures.push({
             name: dignitaryName,
             category_id: categoryId,
-            subcategory_id: subcategoryId
+            subcategory_id: subcategoryId,
+            id_prodCode: prodCode
         });
 
        toggleEmptyRow();
@@ -164,4 +260,73 @@ $(document).ready(function () {
 
 
 </script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Function to fetch categories and subcategories from an API
+    function fetchCategories() {
+      fetch('https://example.com/api/categories')  // Replace with your API endpoint
+        .then(response => response.json())
+        .then(data => {
+          // Assuming data is an array of categories
+          const categories = data.categories || [];
+          const categoryList = document.getElementById('categoryList');
+          categoryList.innerHTML = '';  // Clear existing list
+
+          categories.forEach(category => {
+            const categoryCard = `
+              <div class="col">
+                <div class="card">
+                  <div class="card-body">
+                    <h5 class="card-title">${category.name}</h5>
+                    <p class="card-text">${category.description}</p>
+                  </div>
+                </div>
+              </div>
+            `;
+            categoryList.innerHTML += categoryCard;
+          });
+        })
+        .catch(error => {
+          console.error('Error fetching categories:', error);
+        });
+    }
+
+    function fetchSubcategories() {
+      fetch('https://example.com/api/subcategories')  // Replace with your API endpoint
+        .then(response => response.json())
+        .then(data => {
+          // Assuming data is an array of subcategories
+          const subcategories = data.subcategories || [];
+          const subcategoryList = document.getElementById('subcategoryList');
+          subcategoryList.innerHTML = '';  // Clear existing list
+
+          subcategories.forEach(subcategory => {
+            const subcategoryCard = `
+              <div class="col">
+                <div class="card">
+                  <div class="card-body">
+                    <h5 class="card-title">${subcategory.name}</h5>
+                    <p class="card-text">${subcategory.description}</p>
+                  </div>
+                </div>
+              </div>
+            `;
+            subcategoryList.innerHTML += subcategoryCard;
+          });
+        })
+        .catch(error => {
+          console.error('Error fetching subcategories:', error);
+        });
+    }
+
+    // Fetch categories and subcategories when modal is shown
+    const categoryModal = document.getElementById('categoryModal');
+    categoryModal.addEventListener('shown.bs.modal', function() {
+      fetchCategories();
+      fetchSubcategories();
+    });
+  });
+</script>
+
 {% endblock content %}

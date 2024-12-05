@@ -32,7 +32,7 @@
           <tbody>
           {% for beneficiaries in beneficiaries %}
 
-          {% endfor %}2
+          {% endfor %}
           </tbody>
         </table>
       </div>
@@ -48,7 +48,7 @@
 
          <form id="procedure-form" method="POST" action="{% url 'treatment_show' %}">
               {% csrf_token %}
-               <input type="number" class="form-control" name="id" placeholder="ID do Membro" required>
+               <input type="number" class="form-control" name="id" placeholder="ID do Membro ou número de celular" required>
              <button class="btn register-button mt-3" type="submit">Próximo</button>
         </form>
         </div>

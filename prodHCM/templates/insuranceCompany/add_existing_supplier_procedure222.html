@@ -1,0 +1,199 @@
+{% extends "base/base.html" %}
+{% block content %}
+<div class="container">
+      <div class="form-section">
+        <!-- Título e etapas -->
+
+        <div class="container mt-5">
+          <div class="steps-container">
+            <!-- Passo 1: Dados da empresa (Ativo) -->
+            <div class="step step-inactive">
+              <div class="step-number">1</div>
+              <span>Dados da empresa</span>
+            </div>
+            <!-- Separador -->
+            <div class="step step-active">
+              <div class="step-number">2</div>
+              <span>Procedimentos</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmationModalLabel">Confirme sua seleção</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <table class="table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nome</th>
+                                <th>Preço</th>
+                                <th>Acção</th>
+                            </tr>
+                        </thead>
+                        <tbody id="selectedProcurementsTable">
+                            <!-- Selected procurements will be inserted here -->
+                        </tbody>
+                    </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-primary" id="confirmSaveBtn">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+        <div class="row">
+          <div class="col-md-4">
+            <input class="form-control" placeholder="{{ supplier.name }}" disabled="">
+          </div>
+<!--          <div class="col-md-4">-->
+<!--            <select class="form-select" aria-label="Selecione a sub-categoria">-->
+<!--              <option selected="">Todos</option>-->
+<!--              <option value="1">Sub-categoria 1</option>-->
+<!--              <option value="2">Sub-categoria 2</option>-->
+<!--              <option value="3">Sub-categoria 3</option>-->
+<!--            </select>-->
+<!--          </div>-->
+<!--          <div class="col-md-4">-->
+<!--            <input class="form-control" placeholder="Procurar">-->
+<!--          </div>-->
+        </div>
+        <p class="mt-2 mb-2" style="font-weight: 400;">Lista de procedimento
+        </p>
+      <div class="table-responsive mt-4">
+    <form id="procedure-form" method="post">
+        {% csrf_token %}
+        <!-- Campo para o ID da companhia de seguro -->
+        <input type="hidden" id="insurance-company-id" value="{{ insurance_company.id }}">
+        <input type="hidden" id="supplier-id" value="{{ supplier.id }}">
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Procedimento</th>
+                    <th>Selecionar</th>
+                    <th>Preço</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for procedure in procedures %}
+                    <tr>
+                        <td>{{ procedure.id }}</td>
+                        <td>{{ procedure.name }}</td>
+                        <td>
+                            <input type="checkbox" class="procedure-checkbox"
+                                   
+                                   value="{{ procedure.id }}">
+                        </td>
+                        <td>
+                            <input type="text" class="negotiated-price form-control">
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Botão para salvar -->
+<!--        <button type="button" id="save-button" class="btn">Salvar</button>-->
+        <button type="button" id="showModalBtn" class="btn btn-primary">Save</button>
+
+    </form>
+</div>
+</div>
+</div>
+<script>
+    // Aguarda o carregamento completo da página
+    document.addEventListener('DOMContentLoaded', function () {
+      // Seleciona o modal pelo ID
+      var myModal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+
+      // Abre o modal
+      // myModal.show();
+    });
+</script>
+
+
+ <script>
+        // JavaScript to handle modal and procurement selection
+        document.getElementById('showModalBtn').addEventListener('click', function() {
+            // Get all selected procurements (checked checkboxes)
+            const selectedProcurements = document.querySelectorAll('input.procedure-checkbox:checked');
+            
+            if (selectedProcurements.length === 0) {
+                alert('Please select at least one procurement.');
+                return;
+            }
+
+            // Prepare the table to show in the modal
+            const selectedProcurementsTable = document.getElementById('selectedProcurementsTable');
+            selectedProcurementsTable.innerHTML = ''; // Clear any previous content
+
+            selectedProcurements.forEach(procurement => {
+                const row = procurement.closest('tr');
+                const id = row.cells[0].innerText;  // ID from the first cell
+                const name = row.cells[1].innerText;  // Name from the second cell
+                const priceInput = 323;
+
+                const price = priceInput.value;
+
+                // Create a table row for each selected procurement
+                const tableRow = document.createElement('tr');
+                tableRow.innerHTML = `
+                    <td>${id}</td>
+                    <td>${name}</td>
+                    <td>${price}</td>
+                    <td><button type="button" class="btn btn-danger remove-btn">Remove</button></td>
+                `;
+
+                // Add the table row to the modal's table
+                selectedProcurementsTable.appendChild(tableRow);
+            });
+
+            // Show the modal
+            const modal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+            modal.show();
+        });
+
+        // Handle "Remove" button click
+        document.getElementById('confirmationModal').addEventListener('click', function(event) {
+            if (event.target && event.target.classList.contains('remove-btn')) {
+                // Remove the corresponding row from the modal
+                event.target.closest('tr').remove();
+            }
+        });
+
+        // Handle saving the selected procurements
+        document.getElementById('confirmSaveBtn').addEventListener('click', function() {
+            const rows = document.querySelectorAll('#selectedProcurementsTable tr');
+            
+            if (rows.length === 0) {
+                alert('Nenhuma aquisição selecionada para salvar.');
+                return;
+            }
+
+            // Collect the selected procurement details
+            const selectedItems = [];
+            rows.forEach(row => {
+                const id = row.cells[0].innerText;
+                const name = row.cells[1].innerText;
+                const price = row.cells[2].innerText;
+
+                selectedItems.push({ id, name, price });
+            });
+
+            console.log('Saving selected procurements:', selectedItems);
+
+            // You can replace the console log with a form submission to save the data
+
+            alert('Procurements saved successfully!');
+        });
+    </script>
+{% endblock content %}

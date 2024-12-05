@@ -1,13 +1,13 @@
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm
 from django.forms import modelformset_factory
-
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
 from prodHCM.models import InsuranceCompany, Procedure, Category, Client, Supplier, InsurancePlan, \
-    InsuranceCompanyProcedure, BeneficiarieTreatment, Beneficiaries, SubCategory, Individuals
+    InsuranceCompanyProcedure, BeneficiarieTreatment, Beneficiaries, SubCategory, Individuals, Profile
 
 
 class CustomLoginForm(AuthenticationForm):
-    # Customizing the AuthenticationForm
     username = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Username'})
     )
@@ -18,8 +18,7 @@ class CustomLoginForm(AuthenticationForm):
 class InsuranceCompanyFrom(forms.ModelForm):
     class Meta:
         model = InsuranceCompany
-        # fields = '__all__'
-        fields = ('name','nuitNumber','phoneNumber','date_of_activity_start','email','address','district','province','contractFile','nuitFile','insuranceCompanyType')
+        fields = ('name','nuitNumber','phoneNumber','date_of_activity_start','email','address','district','province','contractFile','nuitFile','insuranceCompanyType','firstUserName','perParticipationCompay','perParticipationBeneficiaries')
         widgets = {
             'date_of_activity_start': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
         }
@@ -74,14 +73,32 @@ class AddSupplierToInsuranceFrom(forms.Form):
 class ProceduresFrom(forms.ModelForm):
     class Meta:
         model = Procedure
-        fields = '__all__'
+        fields = ('name','subCategory','base_price','code')
         subCategory = forms.ModelChoiceField(queryset=SubCategory.objects.none(), empty_label="Selecione a categoria primeiro")
 
+class CategoryFrom(forms.ModelForm):
+    class Meta:
+        model = Category
+        fields = '__all__'
+        widgets = {
+            'name': forms.DateInput(attrs={'class': 'form-control'}),
+        }
+        labels = {
+            'supplierType': 'Tipo de provedor',
+        }
+
+class SubCategoryFrom(forms.ModelForm):
+    class Meta:
+        model = SubCategory
+        fields = '__all__'
+        labels = {
+            'category': 'Categoria',
+        }
 
 class ClientsForm(forms.ModelForm):
         class Meta:
             model = Client
-            fields = ('insuranceCompany','name','nuitNumber','phoneNumber','date_of_activity_start','email','address','district','province','contractFile','nuitFile')
+            fields = ('insuranceCompany','name','nuitNumber','phoneNumber','date_of_activity_start','email','address','district','province','contractFile','nuitFile','firstUserName')
             # fields = '__all__'
             widgets = {
                 'insuranceCompany': forms.HiddenInput(),
@@ -100,16 +117,17 @@ class AddInsurancePlanClientFrom(forms.Form):
 class SupplierForm(forms.ModelForm):
     class Meta:
         model = Supplier
-        fields = '__all__'
+        fields = ('name', 'nuitNumber', 'phoneNumber', 'email', 'address',
+                  'district', 'province', 'contractFile', 'nuitFile','supplierType','firstUserName','latitude','longitude')
+
         widgets = {
             'date_of_activity_start': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'procedures': forms.CheckboxSelectMultiple(),
         }
+        labels = {
+            'supplierType': 'Tipo de provedor',
+        }
 
-        # def clean_procedures(self):
-        #     # If no procedures are selected, return an empty list
-        #     procedure = self.cleaned_data.get('procedures', [])
-        #     return procedures
 
 class BeneficiarieTreatmentForm(forms.ModelForm):
     class Meta:
@@ -123,7 +141,7 @@ class BeneficiarieTreatmentForm(forms.ModelForm):
 class BeneficiariesForm(forms.ModelForm):
     class Meta:
         model = Beneficiaries
-        fields = ('insuranceCompany','client','name','email','insurancePlan')
+        fields = ('insuranceCompany','client','name','email','insurancePlan','phoneNumber')
         widgets = {
             'client': forms.HiddenInput(),
             'insuranceCompany': forms.HiddenInput(),
@@ -135,10 +153,39 @@ class BeneficiariesForm(forms.ModelForm):
 class IndividualsForm(forms.ModelForm):
     class Meta:
         model = Individuals
-        fields = ('insuranceCompany','name','email','insurancePlan')
+        fields = ('insuranceCompany','name','email','insurancePlan','phoneNumber')
         widgets = {
             'insuranceCompany': forms.HiddenInput(),
         }
         labels = {
             'insurancePlan': 'Plano',
+        }
+
+
+class CreateUserForm(UserCreationForm):
+    email = forms.EmailField(required=True, label="Email", widget=forms.EmailInput(attrs={
+        'class': 'form-control', 'placeholder': 'Digite o email'
+    }))
+    first_name = forms.CharField(required=True, label="Primeiro Nome", widget=forms.TextInput(attrs={
+        'class': 'form-control', 'placeholder': 'Digite o primeiro nome'
+    }))
+    last_name = forms.CharField(required=True, label="Último Nome", widget=forms.TextInput(attrs={
+        'class': 'form-control', 'placeholder': 'Digite o último nome'
+    }))
+
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'first_name', 'last_name', 'password1', 'password2']
+        widgets = {
+            'username': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Digite o nome de usuário'}),
+            'password1': forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Digite a senha'}),
+            'password2': forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Confirme a senha'}),
+        }
+
+class ProfileForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ['photo', 'preferred_color','logo']
+        widgets = {
+            'preferred_color': forms.TextInput(attrs={'type': 'color'}),
         }

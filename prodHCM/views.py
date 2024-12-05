@@ -8,17 +8,33 @@ from django.core.mail import send_mail
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.utils.html import strip_tags
+from django.contrib.auth.models import Group
 
 from .forms import CustomLoginForm, InsuranceCompanyFrom, ProceduresFrom, ClientsForm, SupplierForm, \
     AddSupplierToInsuranceFrom, InsurancePlanForm, InsuranceCompanyProcedureForm, \
-    InsuranceCompanyProcedureFormSet, AddInsurancePlanClientFrom, BeneficiariesForm, IndividualsForm
+    InsuranceCompanyProcedureFormSet, AddInsurancePlanClientFrom, BeneficiariesForm, IndividualsForm, CategoryFrom, \
+    SubCategoryFrom, CreateUserForm, ProfileForm
 from .models import InsuranceCompany, Procedure, Client, Supplier, InsurancePlan, InsuranceCompanyProcedure, \
-    Beneficiaries, BeneficiarieTreatment, Category, SubCategory, Individuals
+    Beneficiaries, BeneficiarieTreatment, Category, SubCategory, Individuals, User, Profile
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 import requests
 from django.http import JsonResponse, HttpResponse, HttpResponseForbidden
+import re
 
+def create_user(firstUserName,role):
+
+    user = User.objects.create_user(
+        username=firstUserName.strip().replace(" ", "").lower(),
+        password="password"
+    )
+
+    Profile.objects.create(user=user)
+
+    group = Group.objects.get(name=role)
+    user.groups.add(group)
+
+    return user
 
 def send_email(request,address,subject,html_content):
     context = {}
@@ -63,7 +79,7 @@ def custom_logout(request):
     logout(request)
     return redirect('custom_login')
 
-@login_required
+
 def dashboard(request):
 
     if request.user.is_authenticated:
@@ -82,7 +98,10 @@ def dashboard(request):
 
         elif request.user.groups.filter(name='InsuranceCompany').exists():
 
-            insuranceCompany = getattr(request.user, 'insuranceCompany', None)
+            # insuranceCompany = getattr(request.user, 'insuranceCompany', None)
+            user = request.user
+            insuranceCompany = user.insuranceCompany.all().first()
+
             insurance_clients = Client.objects.filter(insuranceCompany__id=insuranceCompany.id)[:5]
             insurance_clients_all = Client.objects.filter(insuranceCompany__id=insuranceCompany.id).count()
 
@@ -91,7 +110,9 @@ def dashboard(request):
 
         elif request.user.groups.filter(name='Supplier').exists():
 
-            supplier = getattr(request.user, 'supplier', None)
+            user = request.user
+            supplier = user.supplier.all().first()
+            # supplier = getattr(request.user, 'supplier', None)
             insuranceCompanys = supplier.insuranceCompany.all()
             supplier_insuranceCompanys = supplier.insuranceCompany.count()
 
@@ -119,7 +140,9 @@ def dashboard(request):
 
 def insurance_plan_list(request):
 
-    insuranceCompany = getattr(request.user, 'insuranceCompany', None)
+    # insuranceCompany = getattr(request.user, 'insuranceCompany', None)
+    user = request.user
+    insuranceCompany = user.insuranceCompany.all().first()
     insurancePlan = InsurancePlan.objects.filter(insuranceCompany=insuranceCompany).order_by('-id')
 
     context = {
@@ -130,10 +153,12 @@ def insurance_plan_list(request):
 
     return render(request, "insuranceCompany/plan_list.html",context)
 
-@login_required
+
 def insurance_plan_create(request, id=0):
 
-    insuranceCompany = getattr(request.user, 'insuranceCompany', None)
+    # insuranceCompany = getattr(request.user, 'insuranceCompany', None)
+    user = request.user
+    insuranceCompany = user.insuranceCompany.all().first()
 
     if request.method == "GET":
         if id == 0 :
@@ -177,11 +202,18 @@ def insurance_plan_show(request, id):
 
 def insurance_supplier_list(request):
 
-    insuranceCompany = getattr(request.user, 'insuranceCompany', None)
+    # insuranceCompany = getattr(request.user, 'insuranceCompany', None)
+    user = request.user
+    insuranceCompany = user.insuranceCompany.all().first()
+
+    # print(insuranceCompany.id)
+
     company = InsuranceCompany.objects.get(id=insuranceCompany.id)
     suppliers = company.supplier.all()
+
     try:
         company = InsuranceCompany.objects.get(id=insuranceCompany.id, user=request.user)
+        insuranceCompanyProcedure = InsuranceCompanyProcedure.objects.filter(insuranceCompany=insuranceCompany)
     except InsuranceCompany.DoesNotExist:
         return redirect('/dashboard')
 
@@ -203,16 +235,18 @@ def insurance_supplier_list(request):
         context = {
             'title': 'Meus Provedores',
             'suppliers': suppliers,
-            'form': form
+            'form': form,
+            'insuranceCompanyProcedures': insuranceCompanyProcedure,
         }
 
         return render(request, 'insuranceCompany/supplier_list.html', context)
 
-@login_required
+
 def add_insurance_supplier(request):
 
-    insuranceCompany = getattr(request.user, 'insuranceCompany', None)
-
+    # insuranceCompany = getattr(request.user, 'insuranceCompany', None)
+    user = request.user
+    insuranceCompany = user.insuranceCompany.all().first()
     try:
         company = InsuranceCompany.objects.get(id=insuranceCompany.id, user=request.user)
     except InsuranceCompany.DoesNotExist:
@@ -262,13 +296,16 @@ def get_procedures(request):
 
     return JsonResponse(data)
 
-@login_required
+
 def add_insurance_supplier_procedure(request,id):
 
-    insurance_company = getattr(request.user, 'insuranceCompany', None)
+    # insurance_company = getattr(request.user, 'insuranceCompany', None)
+    user = request.user
+    insurance_company = user.insuranceCompany.all().first()
     supplier = Supplier.objects.get(id=id)
 
     if request.method == 'POST':
+        print("HELL")
         formset = InsuranceCompanyProcedureFormSet(request.POST, queryset=InsuranceCompanyProcedure.objects.filter(insuranceCompany=insurance_company,supplier=supplier))
         if formset.is_valid():
             formset.save()
@@ -288,38 +325,51 @@ def add_insurance_supplier_procedure(request,id):
             'saved_procedures_ids': saved_procedures_ids,
         }
 
-    return render(request, 'insuranceCompany/add_existing_supplier_procedure.html', context)
+        return render(request, 'insuranceCompany/add_existing_supplier_procedure.html', context)
 
 @csrf_exempt
 def save_procedures(request):
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body)
-            procedures_data = data.get("procedures", [])
-            supplier_id = data.get("supplier_id")
 
-            insurance_company_id = getattr(request.user, 'insuranceCompany', None)
+    if request.method == "POST":
+
+        try:
+            # data = json.loads(request.body)
+            # procedures_data = data.get("procedures", [])
+            procedures_data = json.loads(request.POST.get('selected_data'))
+            # selected_data = json.loads(request.POST.get('selected_data'))
+            supplier_id = json.loads(request.POST.get('supplierId'))
+
+            # insurance_company_id = getattr(request.user, 'insuranceCompany', None)
+            user = request.user
+            insurance_company_id = user.insuranceCompany.all().first()
 
             if not procedures_data:
                 return JsonResponse({"success": False, "error": "Nenhum procedimento selecionado."})
 
             # Loop para salvar cada procedimento selecionado com o preço negociado
             for procedure_data in procedures_data:
-                procedure_id = procedure_data.get("procedure_id")
-                negotiated_price = procedure_data.get("negotiated_price")
+
+                procedure_id = procedure_data.get("id")
+                negotiated_price = procedure_data.get("price")
 
                 try:
+                    if not insurance_company_id.supplier.filter(id=supplier_id).exists():
+                        insurance_company_id.supplier.add(supplier_id)
+
                     procedure = Procedure.objects.get(id=procedure_id)
                     # Cria o registro de InsuranceCompanyProcedure
+                    print(insurance_company_id.id)
                     InsuranceCompanyProcedure.objects.create(
                         insuranceCompany_id=insurance_company_id.id,
                         procedure=procedure,
                         supplier_id=supplier_id,
                         negotiated_price=negotiated_price
                     )
+
                 except Procedure.DoesNotExist:
                     return JsonResponse({"success": False, "error": f"Procedimento {procedure_id} não encontrado."})
 
+            messages.success(request, 'Procedimentos salvos com sucesso!')
             return JsonResponse({"success": True, "message": "Procedimentos salvos com sucesso!"})
 
         except json.JSONDecodeError as e:
@@ -340,10 +390,12 @@ def search_suppliers(request):
     return JsonResponse(results, safe=False)
 
 def insurance_list(request):
+
     context = {
         'title': 'Clientes',
         'insuranceCompany' : InsuranceCompany.objects.all().order_by('-id')
     }
+
     return render(request, "insuranceCompany/list.html",context)
 
 def insurance_form(request, id=0):
@@ -366,23 +418,49 @@ def insurance_form(request, id=0):
             'insuranceCompany': InsuranceCompany.objects.all().order_by('-id')
         }
         if form.is_valid():
-            form.save()
+            insuranceCompany = form.save()
+            firstUserName = request.POST.get('firstUserName')
+            user = create_user(firstUserName,"InsuranceCompany")
+            insuranceCompany.user.add(user)
             messages.success(request, 'Cliente criado com sucesso!')
             return redirect('/dashboard/insurance/list/', context)
         else:
             return render(request, 'insuranceCompany/create.html', {'form': form})
 
 def procedures_list(request):
-    context = {
-        'title': 'Procedimentos',
-        'procedures' : Procedure.objects.all().order_by('-id')
-    }
-    return render(request, "procedures/list.html",context)
+
+    categories = Category.objects.all()  # Obtém todas as categorias
+    category_data = []
+
+    # Para cada categoria, buscamos suas subcategorias e somamos os procedimentos
+    for category in categories:
+        subcategories = category.subCategory.all()  # Obtém todas as subcategorias da categoria
+        total_procedures = 0
+        subcategory_names = []
+
+        for subcategory in subcategories:
+            procedure_count = subcategory.procedure.count()  # Conta o número de procedimentos na subcategoria
+            total_procedures += procedure_count
+            subcategory_names.append(subcategory.name)
+
+        category_data.append({
+            'category_name': category.name,
+            'subcategories': ', '.join(subcategory_names),  # Lista as subcategorias separadas por vírgulas
+            'total_procedures': total_procedures
+        })
+        context = {
+            'title': 'Procedimentos',
+            'procedures': Procedure.objects.all().order_by('-id'),
+            'category_data': category_data
+        }
+
+        return render(request, "procedures/list.html",context)
 
 def procedures_form(request, id=0):
     if request.method == "GET":
         if id == 0 :
             form = ProceduresFrom()
+
         else:
             procedure = Procedure.objects.get(pk=id)
             form = ProceduresFrom(instance = procedure)
@@ -417,6 +495,7 @@ def procedures_form(request, id=0):
             procedure_objects = [
                 Procedure(
                     name=procedure['name'],
+                    code=procedure['id_prodCode'],
                     subCategory=SubCategory.objects.get(pk=procedure['subcategory_id']),
                 )
                 for procedure in procedures
@@ -438,10 +517,94 @@ def procedures_form(request, id=0):
         else:
             return render(request, 'procedures/create.html', {'form': form})
 
+def category_list(request, id=0):
+
+    if request.method == "GET":
+        if id == 0 :
+            form = CategoryFrom()
+        else:
+            form = CategoryFrom()
+
+        context = {
+            'title': 'Categorias',
+            'form': form,
+            'categorys': Category.objects.all().order_by('-id'),
+        }
+        return render(request, "category/list.html",context)
+
+    else:
+
+        form = CategoryFrom(request.POST)
+
+        context = {
+            'title': 'Categorias',
+            'categorys': Category.objects.all().order_by('-id'),
+        }
+
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Categoria criado com sucesso!')
+            return redirect('/dashboard/category/list/', context)
+        else:
+            context = {
+                'title': 'Categorias',
+                'form': form,
+                'categorys': Category.objects.all().order_by('-id'),
+            }
+            return render(request, 'category/list.html', context)
+
+def category_show(request, id):
+
+    category = get_object_or_404(Category, pk=id)
+
+    context = {
+        'title': category.name,
+        'category': category,
+    }
+
+    return render(request, "category/show.html", context)
+
+def subCategory_list(request, id=0):
+
+    if request.method == "GET":
+        if id == 0 :
+            form = SubCategoryFrom()
+        else:
+            form = SubCategoryFrom()
+
+        context = {
+            'title': 'Sub Categorias',
+            'form': form,
+            'subCategorys': SubCategory.objects.all().order_by('-id'),
+        }
+        return render(request, "category/subCategory/list.html",context)
+
+    else:
+
+        form = SubCategoryFrom(request.POST)
+
+        context = {
+            'title': 'Sub Categorias',
+            'subCategorys': SubCategory.objects.all().order_by('-id'),
+        }
+
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Sub Categoria criado com sucesso!')
+            return redirect('/dashboard/subCategory/list', context)
+        else:
+            context = {
+                'title': 'Sub Categorias',
+                'form': form,
+                'subCategorys': SubCategory.objects.all().order_by('-id'),
+            }
+            return render(request, 'category/subCategory/list.html', context)
+
 def client_list(request):
 
-    insuranceCompany = getattr(request.user, 'insuranceCompany', None)
-
+    # insuranceCompany = getattr(request.user, 'insuranceCompany', None)
+    user = request.user
+    insuranceCompany = user.insuranceCompany.all().first()
     context = {
         'title': 'Clientes',
         'clients' : Client.objects.filter(insuranceCompany__id=insuranceCompany.id)
@@ -451,7 +614,9 @@ def client_list(request):
 
 def client_form(request, id=0):
 
-    insuranceCompany = getattr(request.user, 'insuranceCompany', None)
+    # insuranceCompany = getattr(request.user, 'insuranceCompany', None)
+    user = request.user
+    insuranceCompany = user.insuranceCompany.all().first()
 
     if request.method == "GET":
         if id == 0 :
@@ -459,6 +624,9 @@ def client_form(request, id=0):
         else:
             client = Client.objects.get(pk=id)
             form = ClientsForm(instance = client)
+            firstUserName = request.POST.get('firstUserName')
+            user = create_user(firstUserName,"Client")
+            client.user.add(user)
 
         context = {
             'title': 'Criar novo Clientes',
@@ -483,7 +651,7 @@ def client_form(request, id=0):
         else:
             return render(request, 'clients/create.html', {'form': form})
 
-@login_required
+
 def client_show(request, id):
 
     client = get_object_or_404(Client, id=id)
@@ -554,7 +722,9 @@ def client_show_link(request, id):
 def client_beneficiaries_store(request, session,client):
 
     client = get_object_or_404(Client, id=client)
-    insurance_company = getattr(request.user, 'insuranceCompany', None)
+    # insurance_company = getattr(request.user, 'insuranceCompany', None)
+    user = request.user
+    insurance_company = user.insuranceCompany.all().first()
 
     linkGenerated = get_session_data(request,client)
 
@@ -619,7 +789,9 @@ def client_beneficiaries_store(request, session,client):
 
 def client_plan_store(request):
 
-    insuranceCompany = getattr(request.user, 'insuranceCompany', None)
+    # insuranceCompany = getattr(request.user, 'insuranceCompany', None)
+    user = request.user
+    insuranceCompany = user.insuranceCompany.all().first()
 
     client_id = request.POST['client']
 
@@ -679,7 +851,9 @@ def supplier_show(request,id=0):
 
 def supplier_client_list(request):
 
-    supplier = getattr(request.user, 'supplier', None)
+    # supplier = getattr(request.user, 'supplier', None)
+    user = request.user
+    supplier = user.supplier.all().first()
 
     insuranceCompanys = supplier.insuranceCompany.all()
 
@@ -692,7 +866,9 @@ def supplier_client_list(request):
 
 def supplier_form(request, id=0):
 
-    insuranceCompany = getattr(request.user, 'insuranceCompany', None)
+    # insuranceCompany = getattr(request.user, 'insuranceCompany', None)
+    user = request.user
+    insuranceCompany = user.insuranceCompany.all().first()
 
     categorys = Category.objects.all()
 
@@ -702,6 +878,7 @@ def supplier_form(request, id=0):
         else:
             supplier = Supplier.objects.get(pk=id)
             form = SupplierForm(instance = supplier)
+
 
         category_id = request.GET.get('category_id')
         subCategory_id = request.GET.get('subCategory_id')
@@ -732,6 +909,10 @@ def supplier_form(request, id=0):
 
             supplier = form.save()
 
+            firstUserName = request.POST.get('firstUserName')
+            user = create_user(firstUserName,"Supplier")
+            supplier.user.add(user)
+
             for procedure_data in data:
                 name = procedure_data.get('name')
                 price = procedure_data.get('price')
@@ -746,7 +927,6 @@ def supplier_form(request, id=0):
 
                 # Cria ou atualiza o InsuranceCompanyProcedure
                 InsuranceCompanyProcedure.objects.update_or_create(
-                    insuranceCompany=insuranceCompany,
                     supplier=supplier,
                     procedure=procedure,
                     defaults={
@@ -758,7 +938,9 @@ def supplier_form(request, id=0):
             return redirect( '/dashboard/supplier/list/',context)
 
         else:
-
+            # Exibe os erros no console
+            print("Formulário inválido. Erros:")
+            print(form.errors.as_json())
             context = {
                 'title': 'Provedor',
                 'form': form,
@@ -769,8 +951,9 @@ def supplier_form(request, id=0):
 
 def supplier_client_show(request,id):
 
-    supplier = getattr(request.user, 'supplier', None)
-
+    # supplier = getattr(request.user, 'supplier', None)
+    user = request.user
+    supplier = user.supplier.all().first()
     insurance_company = InsuranceCompany.objects.get(pk=id)
 
     saved_procedures = InsuranceCompanyProcedure.objects.filter(insuranceCompany=insurance_company,supplier=supplier)
@@ -789,7 +972,10 @@ def supplier_client_show(request,id):
 
 def supplier_procedures(request):
 
-    supplier = getattr(request.user, 'supplier', None)
+    # supplier = getattr(request.user, 'supplier', None)
+
+    user = request.user
+    supplier = user.supplier.all().first()
 
     procedures = InsuranceCompanyProcedure.objects.filter(supplier=supplier)
 
@@ -847,7 +1033,9 @@ def send_beneficiaries_email(request,savedForm):
 
 def beneficiarie_client_create(request, client_id=0):
     client = get_object_or_404(Client, id=client_id)
-    insuranceCompany = getattr(request.user, 'insuranceCompany', None)
+    # insuranceCompany = getattr(request.user, 'insuranceCompany', None)
+    user = request.user
+    insuranceCompany = user.insuranceCompany.all().first()
     beneficiaries = client.beneficiaries.all().order_by('-id')
 
     if request.method == "POST":
@@ -859,6 +1047,7 @@ def beneficiarie_client_create(request, client_id=0):
                 client=client,
                 name=beneficiaries['name'],
                 email=beneficiaries['email'],
+                phoneNumber=beneficiaries['phoneNumber'],
                 insurancePlan_id=beneficiaries['insurancePlan'],
                 insuranceCompany=insuranceCompany
             )
@@ -880,8 +1069,9 @@ def beneficiarie_client_create(request, client_id=0):
 
 def individual_form(request):
 
-    insuranceCompany = getattr(request.user, 'insuranceCompany', None)
-
+    # insuranceCompany = getattr(request.user, 'insuranceCompany', None)
+    user = request.user
+    insuranceCompany = user.insuranceCompany.all().first()
     if request.method == "POST":
         individuals_data = request.POST.get('individuals', '[]')
         individuals = json.loads(individuals_data)
@@ -892,6 +1082,7 @@ def individual_form(request):
                 name=individuals['name'],
                 email=individuals['email'],
                 insurancePlan_id=individuals['insurancePlan'],
+                phoneNumber=individuals['phoneNumber'],
                 insuranceCompany=insuranceCompany
             )
             send_beneficiaries_email(request, savedForm)
@@ -917,8 +1108,9 @@ def individual_form(request):
 
 def individual_list(request):
 
-    insuranceCompany = getattr(request.user, 'insuranceCompany', None)
-
+    # insuranceCompany = getattr(request.user, 'insuranceCompany', None)
+    user = request.user
+    insuranceCompany = user.insuranceCompany.all().first()
     individuals = insuranceCompany.individuals.all()
 
     context = {
@@ -991,8 +1183,9 @@ def treatment_list(request):
 
 def treatment_form(request, id=0):
 
-    insuranceCompany = getattr(request.user, 'insuranceCompany', None)
-
+    # insuranceCompany = getattr(request.user, 'insuranceCompany', None)
+    user = request.user
+    insuranceCompany = user.insuranceCompany.all().first()
     if request.method == "GET":
         if id == 0 :
             form = ClientsForm(initial={'insuranceCompany': insuranceCompany})
@@ -1027,8 +1220,13 @@ def treatment_show(request):
 
     procedures = Procedure.objects.all()
     beneficiarie = []
+    search_query = request.POST.get('id')
     try:
-        beneficiarie = Beneficiaries.objects.get(pk=request.POST['id'])
+        if search_query.isdigit():
+            beneficiarie = Beneficiaries.objects.get(pk=int(search_query))
+        else:
+            beneficiarie = Beneficiaries.objects.get(phoneNumber=search_query)
+        # beneficiarie = Beneficiaries.objects.get(pk=request.POST['id'])
     except Beneficiaries.DoesNotExist:
         messages.error(request, f'Beneficiario não encontrado')
         return redirect(request.META.get('HTTP_REFERER', '/'))
@@ -1042,3 +1240,60 @@ def treatment_show(request):
 
     return render(request, 'treatment/show.html', context)
 
+def user_list(request):
+
+    users = User.objects.all()
+
+    if request.method == 'POST':
+        form = CreateUserForm(request.POST)
+        if form.is_valid():
+            form.save()
+            context = {
+                'title': "Utilizadores",
+                'users': users,
+            }
+            messages.success(request, "Usuário criado com sucesso!")
+            return redirect('/dashboard/users/list/', context)
+    else:
+        form = CreateUserForm()
+
+        context = {
+            'title': "Utilizadores",
+            'users': users,
+            'form': form,
+        }
+
+    return render(request, 'user/user_list.html', context)
+
+
+
+def manage_profile(request):
+
+    profile = request.user.profile
+    if profile:
+        profile = profile
+    else:
+        profile = []
+
+    if request.method == 'POST':
+        form = ProfileForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            form.save()
+            context = {
+                'title': "Gerir perfil",
+                'form': form,
+                'profile': profile
+            }
+            messages.success(request, 'Adicionados com sucesso!', context)
+            return redirect('/dashboard/manage_profile',context)
+    else:
+
+        form = ProfileForm(instance=profile)
+
+        context = {
+            'title': "Gerir perfil",
+            'form': form,
+            'profile': profile
+        }
+
+    return render(request, 'auth/profile/manage_profile.html', context)

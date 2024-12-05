@@ -24,6 +24,12 @@
             {{ form.insurancePlan|as_crispy_field }}
         </div>
         <div class="col-md-3">
+            {{ form.plafon|as_crispy_field }}
+        </div>
+        <div class="col-md-3">
+            {{ form.phoneNumber|as_crispy_field }}
+        </div>
+        <div class="col-md-2">
             <button type="button" class="btn btn-dark mt-4" id="addBeneficiary">Adicionar</button>
         </div>
     </div>
@@ -36,6 +42,8 @@
                     <th>Nome</th>
                     <th>Email</th>
                     <th>Plano de Seguro</th>
+                    <th>Número de celular</th>
+                    <th>Plafon</th>
                     <th>Ações</th>
                 </tr>
             </thead>
@@ -57,6 +65,7 @@ document.getElementById('addBeneficiary').addEventListener('click', function () 
     const name = document.querySelector('[name="name"]').value;
     const email = document.querySelector('[name="email"]').value;
     const insurancePlan = document.querySelector('[name="insurancePlan"]').value;
+    const phoneNumber = document.querySelector('[name="phoneNumber"]').value;
     const insurancePlanText = document.querySelector('[name="insurancePlan"] option:checked').text;
 
     // Validar campos
@@ -70,6 +79,7 @@ document.getElementById('addBeneficiary').addEventListener('click', function () 
         name: name,
         email: email,
         insurancePlan: insurancePlan,
+        phoneNumber: phoneNumber,
         insurancePlanText: insurancePlanText,
     };
 
@@ -86,6 +96,7 @@ document.getElementById('addBeneficiary').addEventListener('click', function () 
             <td>${newBeneficiary.name}</td>
             <td>${newBeneficiary.email}</td>
             <td>${newBeneficiary.insurancePlanText}</td>
+            <td>${newBeneficiary.phoneNumber}</td>
             <td>
                 <button type="button" class="remove_dignitary btn btn-remove" onclick="removeBeneficiary(${newBeneficiary.id})"><i class="fa-solid fa-x"></i></button>
             </td>

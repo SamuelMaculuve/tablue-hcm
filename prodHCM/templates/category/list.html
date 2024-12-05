@@ -1,0 +1,72 @@
+{% extends "base/base.html" %}
+{% block content %}
+{% load crispy_forms_tags %}
+
+    {% include "includes/sucess_modal_dialog.html" %}
+            <!-- Modal -->
+            <div class="modal fade" id="categoryModal" tabindex="-1" aria-labelledby="categoryModalLabel" aria-hidden="true">
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="categoryModalLabel">Categoria</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                        <form action="" method="post" autocomplete="off" enctype="multipart/form-data">
+                        {% csrf_token %}
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                  {{form.name|as_crispy_field}}
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                  {{form.supplierType|as_crispy_field}}
+                                </div>
+                            </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-secondary" data-bs-dismiss="modal">Salvar</button>
+                      </div>
+                    </form>
+                      </div>
+
+                    </div>
+                  </div>
+                </div>
+
+              <div class="container search-container">
+                <!-- Campo de busca com ícone -->
+                <div class="input-group search-input">
+                  <span class="input-group-text">
+                    <i class="bi bi-search"></i> <!-- Ícone de busca do Bootstrap Icons -->
+                  </span>
+                  <input type="text" class="form-control" placeholder="Procurar">
+                </div>
+
+                <!-- Botão de registro -->
+                <a href="#" class="btn register-button"  data-bs-toggle="modal" data-bs-target="#categoryModal">Adicionar</a>
+
+              </div>
+              <div class="container mb-3">
+                <a href="{% url 'subCategory_list' %}" class="add-category-link">Adicionar nova sub categoria ➔</a>
+              </div>
+                <div class="table-responsive">
+                    <table class="table">
+                      <thead class="table-custom">
+                      <tr>
+                        <th>ID</th>
+                        <th>Nome</th>
+                      </tr>
+                      </thead>
+                      <tbody>
+                      {% for category in categorys %}
+                      <tr>
+                        <td>{{ category.id }}</td>
+                        <td>{{ category.name}}</td>
+<!--                        <td><a href="#" class="btn btn-details"><i class="fa fa-eye"></i></a></td>-->
+                      </tr>
+                      {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+{% endblock content %}

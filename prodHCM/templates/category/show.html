@@ -1,0 +1,54 @@
+{% extends "base/base.html" %}
+{% block content %}
+
+{% include "includes/sucess_modal_dialog.html" %}
+
+<form action="" method="post" autocomplete="off" enctype="multipart/form-data">
+        <div class="row mt-4">
+          <div class="col-md-3">
+              <label class="form-label requiredField">
+                Categoria<span class="asteriskField">*</span>
+            </label>
+                <input type="text" name="prodCode" maxlength="255" class="form-control" required="" id="id_prodCode">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label requiredField">
+                SubCategoria<span class="asteriskField">*</span>
+                </label>
+                 <select id="categoria_id" name="categoria_id" class="form-control">
+                    <option value="">Selecione a Categoria</option>
+
+                        <option value="1">Internamentos/Evacuações</option>
+
+                        <option value="2">Procedimentos Cirúrgicos</option>
+
+                        <option value="3">Procedimentos Médicos</option>
+
+                </select>
+            </div>
+
+        </div>
+    </form>
+
+<div class="table-responsive col-md-6 mt-3">
+  <a href="{% url 'subCategory_list' %}" class="add-category-link  mb-3">Adicionar nova sub categoria ➔</a>
+  <p class="mt-3">Lista de procedimento</p>
+   <table class="table">
+      <thead  class="table-custom">
+        <tr>
+          <th>ID</th>
+          <th>Procedimentos</th>
+        </tr>
+      </thead>
+      <tbody>
+<!--        {% for category in category_data %}-->
+<!--          <tr>-->
+<!--            <td>{{ category.category_name }}</td>-->
+<!--            <td>{{ category.total_procedures }}</td>-->
+<!--          </tr>-->
+<!--        {% endfor %}-->
+      </tbody>
+    </table>
+
+      </div>
+{% endblock content %}

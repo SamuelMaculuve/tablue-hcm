@@ -25,7 +25,14 @@ urlpatterns = [
     path('get_subcategorias/', views.get_subcategorias, name='get_subcategorias'),
     path('get_procedures/', views.get_procedures, name='get_procedures'),
 
-    #clients
+    #category
+    path('category/list/', views.category_list, name='category_list'),
+    path('category/show/<int:id>/', views.category_show, name='category_show'),
+
+    #subCategory
+    path('subCategory/list/', views.subCategory_list, name='subCategory_list'),
+
+    # individuals
     path('individuals/create/', views.individual_form, name='individual_form'),
     path('individuals/list/', views.individual_list, name='individual_list'),
 
@@ -48,6 +55,11 @@ urlpatterns = [
     path('save-procedures/', views.save_procedures, name='save_procedures'),
     path('search-suppliers/', views.search_suppliers, name='search_suppliers'),
 
+    # user
+    path('users/list', views.user_list, name="user_list"),
+
+    #profile
+    path('manage_profile', views.manage_profile, name="manage_profile"),
 
     # treatment
     path('treatment/create/', views.treatment_form, name='treatment_form'),
@@ -55,6 +67,8 @@ urlpatterns = [
     path('treatment/show/', views.treatment_show, name='treatment_show'),
 
     path("get-session-data/", views.get_session_data, name="get_session_data"),
+
+
 
     # path("send-html-email/", views.send_html_email, name="send_html_email"),
 

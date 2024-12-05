@@ -1,0 +1,57 @@
+{% extends "base/base.html" %}
+{% block content %}
+   {% include "includes/sucess_modal_dialog.html" %}
+   {% include "includes/error_modal_dialog.html" %}
+  <div class="container search-container">
+    <!-- Campo de busca com ícone -->
+    <div class="input-group search-input">
+      <span class="input-group-text">
+        <i class="bi bi-search"></i> <!-- Ícone de busca do Bootstrap Icons -->
+      </span>
+      <input type="text" class="form-control" placeholder="Procurar">
+    </div>
+
+    <!-- Botão de registro -->
+    <a href="#" class="btn register-button" data-bs-toggle="modal" data-bs-target="#addInsuranceModal">Novo Utilizador</a>
+
+  </div>
+
+<div class="table-responsive">
+        <table class="table">
+          <thead class="table-custom">
+          <tr>
+            <th>ID</th>
+            <th>Nome do utilizador</th>
+          </tr>
+          </thead>
+          <tbody>
+            {% for user in users %}
+                <tr>
+                    <td>{{ user.id }}</td>
+                <td>{{ user.username }}</td>
+                </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+  <div class="modal fade" id="addInsuranceModal" tabindex="-1" aria-labelledby="addInsuranceModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 style="font-weight: 400;font-size: 25px;">Novo Utilizador</h3>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+
+         <form id="procedure-form" method="POST">
+              {% csrf_token %}
+                {{ form.as_p }}
+             <button class="btn register-button mt-3" type="submit">Criar</button>
+        </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+{% endblock content %}

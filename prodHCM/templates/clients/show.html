@@ -40,7 +40,12 @@
                         <form method="post" action="{% url 'client_plan_store' %}">
                             {% csrf_token %}
                              {{form}}
-
+                            <div id="div_id_name" class="mb-3">
+                                    <label for="id_name" class="form-label requiredField">
+                                        Plafon<span class="asteriskField">*</span>
+                                    </label>
+                                <input type="text" name="name" maxlength="255" class="textinput form-control" required="" id="id_name">
+                            </div>
                             <input value="{{client.id}}" name="client" type="hidden">
 
                             <div class="modal-footer">

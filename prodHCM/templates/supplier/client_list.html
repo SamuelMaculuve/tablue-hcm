@@ -24,6 +24,7 @@
             <th>Nome da empresa</th>
             <th>Contacto</th>
             <th>Endereço</th>
+            <th>Estado</th>
             <th>Detalhes</th>
           </tr>
           </thead>
@@ -34,6 +35,7 @@
             <td>{{ insuranceCompany.name}}</td>
             <td>{{ insuranceCompany.phoneNumber}}</td>
             <td>{{ insuranceCompany.address}}</td>
+            <td><span class="badge bg-primary">Pendente</span></td>
             <td><a href="{% url 'supplier_client_show' insuranceCompany.id %}" class="btn btn-details"><i class="fa fa-eye"></i></a></td>
           </tr>
           {% endfor %}

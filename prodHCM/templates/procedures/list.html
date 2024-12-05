@@ -1,7 +1,6 @@
 {% extends "base/base.html" %}
 {% block content %}
 
-
 {% include "includes/sucess_modal_dialog.html" %}
 
   <div class="container search-container">
@@ -18,26 +17,27 @@
   </div>
 
 
-
- <!-- Companies Table -->
 <div class="table-responsive">
-        <table class="table">
-          <thead class="table-custom">
+   <table class="table">
+      <thead  class="table-custom">
+        <tr>
+          <th>Category</th>
+          <th>Subcategories</th>
+          <th>Procedimentos</th>
+          <th>Detalhes</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for category in category_data %}
           <tr>
-            <th>ID</th>
-            <th>Nome</th>
-            <th>Detalhes</th>
+            <td>{{ category.category_name }}</td>
+            <td>{{ category.subcategories }}</td>
+            <td>{{ category.total_procedures }}</td>
+            <td><a href="{% url 'category_show' 1 %}" class="btn btn-details"><i class="fa fa-eye"></i></a></td>
           </tr>
-          </thead>
-          <tbody>
-          {% for procedure in procedures %}
-          <tr>
-            <td>{{procedure.id}}</td>
-            <td>{{procedure.name}}</td>
-            <td><button class="btn btn-details"><i class="fa fa-eye"></i></button></td>
-          </tr>
-          {% endfor %}
-          </tbody>
-        </table>
+        {% endfor %}
+      </tbody>
+    </table>
+
       </div>
 {% endblock content %}

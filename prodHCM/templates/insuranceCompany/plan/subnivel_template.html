@@ -1,0 +1,93 @@
+{% load crispy_forms_tags %}
+    <style>
+        .btn-custom {
+            width: 5px  !important;
+            height: 20px  !important;
+            display: flex;
+            padding: 8px 12px;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-custom i {
+            font-size: 0.8rem !important;
+        }
+    </style>
+<li class="level" style="list-style-type:none;">
+        <div class="d-flex align-items-center justify-content-between">
+        <!-- Texto -->
+        <div>
+            <span class="fw-bold">{{ level.name }}</span> <span class="text-muted">({{ level.plafonPrice|default:"N/A" }} MT)</span>
+        </div>
+
+        <!-- Botões -->
+        <div class="d-flex gap-2 pt-2" style="margin-left: 200px">
+            <button class="btn btn-primary btn-custom" data-bs-toggle="modal" data-bs-target="#createLeveldrop{{ level.id }}" >
+                <i class="fa fa-plus"></i>
+            </button>
+            <button class="btn btn-primary btn-custom">
+                <i class="fa fa-pencil"></i>
+            </button>
+            <button class="btn btn-danger btn-custom" style="background-color: #dc3545">
+                <i class="fa fa-trash"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="createLeveldrop{{ level.id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="createLeveldropLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-body">
+        <span style="background: #D9D9D9;padding: 5px;"><i class="fa fa-arrow-left"></i></span>
+        <h3 style="font-size: 14pt;" class="mt-4">Adicionar nível - {{ level.name }}</h3>
+        <form action="{% url 'insurance_plan_create_sublevel' %}" method="post" autocomplete="off" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="row mt-4">
+          <div class="col-12">
+                {{form.name|as_crispy_field}}
+          </div>
+
+          <div class="col-12">
+           <label class="form-label">Tem plafon? *</label>
+            <div class="d-flex align-items-center">
+                <div class="form-check me-3" style="border: none">
+                    <input class="form-check-input" type="radio" name="hasPlafon" value="True" id="id_hasPlafon_0" {% if form.hasPlafon.value == "True" %}checked{% endif %}>
+                    <label class="form-check-label" for="id_hasPlafon_0">Sim</label>
+                </div>
+                <div class="form-check"  style="border: none">
+                    <input class="form-check-input" type="radio" name="hasPlafon" value="True" id="id_hasPlafon_0" {% if form.hasPlafon.value == "False" %}checked{% endif %}>
+                    <label class="form-check-label" for="id_hasPlafon_0">Não</label>
+                </div>
+            </div>
+          </div>
+          <div class="col-12 pt-4">
+              {{form.plafonPrice|as_crispy_field}}
+          </div>
+
+            <input value="{{ level.id }}" name="parent_level" type="hidden">
+            <input value="{{ insurancePlan.id }}" name="plan" type="hidden">
+        </div>
+        <div class="d-flex justify-content-end gap-3 mt-4">
+          <button type="button" class="btn btn-cancel mr-4" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-confirm">Adicionar</button>
+        </div>
+    </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+    <ul style="margin-left: 10px;list-style-type:none;margin-bottom: 0">
+        {% for insuranceCompany in level.insurancecompanyprocedures %}
+            <li class="insurance-company">{{ insuranceCompany.procedure }} ({{ insuranceCompany.negotiated_price }} MT)</li>
+        {% endfor %}
+    </ul>
+    {% if level.sublevels %}
+        <ul style="margin-bottom: 0">
+            {% for sublevel in level.sublevels %}
+                {% include 'insuranceCompany/plan/subnivel_template.html' with level=sublevel %}
+            {% endfor %}
+        </ul>
+    {% endif %}
+</li>

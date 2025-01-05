@@ -1,0 +1,30 @@
+{% extends "base/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+<div class="container mt-4">
+    <h2 style="font-size: 12pt;
+    font-weight: 400;">Procedimentos Associados:</h2>
+
+    <div class="table-responsive">
+        <table class="table">
+          <thead class="table-custom">
+          <tr>
+            <th>ID</th>
+            <th>Nome</th>
+          </tr>
+          </thead>
+          <tbody>
+          {% for procedure in procedures %}
+          <tr>
+            <td>{{procedure.id}}</td>
+            <td>{{procedure.name}}</td>
+          </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+</div>
+
+{% endblock content %}

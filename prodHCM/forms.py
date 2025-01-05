@@ -4,7 +4,7 @@ from django.forms import modelformset_factory
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from prodHCM.models import InsuranceCompany, Procedure, Category, Client, Supplier, InsurancePlan, \
-    InsuranceCompanyProcedure, BeneficiarieTreatment, Beneficiaries, SubCategory, Individuals, Profile
+    InsuranceCompanyProcedure, BeneficiarieTreatment, Beneficiaries, SubCategory, Individuals, Profile, Level
 
 
 class CustomLoginForm(AuthenticationForm):
@@ -35,6 +35,9 @@ class InsurancePlanForm(forms.ModelForm):
     class Meta:
         model = InsurancePlan
         fields =  '__all__'
+        widgets = {
+            'hasPlafon': forms.RadioSelect(choices=[(True, "Sim"), (False, "Não")]),
+        }
         # fields = ('name','status')
         # labels = {
         #     'name' : 'Nome',
@@ -42,26 +45,24 @@ class InsurancePlanForm(forms.ModelForm):
         #     'insuranceCompany' : 'insuranceCompany',
         #     'procedure' : 'procedure',
         # }
-    procedure = forms.ModelMultipleChoiceField(
-        queryset = Procedure.objects.all(),
-        widget = forms.CheckboxSelectMultiple,
-        label='Lista de procedimento'
-    )
+    # procedure = forms.ModelMultipleChoiceField(
+    #     queryset = Procedure.objects.all(),
+    #     widget = forms.CheckboxSelectMultiple,
+    #     label='Lista de procedimento'
+    # )
+
+class LevelForm(forms.ModelForm):
+    class Meta:
+        model = Level
+        fields =  '__all__'
+        widgets = {
+            'hasPlafon': forms.RadioSelect(choices=[(True, "Sim"), (False, "Não")]),
+        }
 
 class InsuranceCompanyProcedureForm(forms.ModelForm):
     class Meta:
         model = InsuranceCompanyProcedure
-        fields = ['procedure', 'negotiated_price']
-        widgets = {
-            'negotiated_price': forms.NumberInput(attrs={'placeholder': 'Preço Negociado'}),
-            'procedure': forms.CheckboxInput(),
-        }
-
-InsuranceCompanyProcedureFormSet = modelformset_factory(
-    InsuranceCompanyProcedure,
-    form=InsuranceCompanyProcedureForm,
-    extra=0
-)
+        fields = "__all__"
 
 class AddSupplierToInsuranceFrom(forms.Form):
     supplier = forms.ModelMultipleChoiceField(

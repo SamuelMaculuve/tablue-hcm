@@ -1,6 +1,5 @@
 from django.urls import path
 from . import views
-from .views import procedures_form
 
 urlpatterns = [
 
@@ -14,6 +13,9 @@ urlpatterns = [
     path('insurance/list/', views.insurance_list, name='insurance_list'),
     path('insurance/plan/list/', views.insurance_plan_list, name='insurance_plan_list'),
     path('insurance/plan/add_plan/', views.insurance_plan_create, name='insurance_plan_create'),
+    path('insurance/plan/add_plan_steap-2/<int:id>/', views.insurance_plan_create_step2, name='insurance_plan_create_step2'),
+    path('insurance/plan/add_plan_procedure/<int:id>/', views.insurance_plan_create_procedure, name='insurance_plan_create_procedure'),
+    path('insurance/plan/insurance_plan_create_sublevel', views.insurance_plan_create_sublevel, name='insurance_plan_create_sublevel'),
     path('insurance/plan/show_plan/<int:id>/', views.insurance_plan_show, name='insurance_plan_show'),
     path('insurance/supplier/list/', views.insurance_supplier_list, name='insurance_supplier_list'),
     path('insurance/supplier/create/', views.add_insurance_supplier, name='add_insurance_supplier'),

@@ -80,18 +80,6 @@ class InsuranceCompany(models.Model):
     def __str__(self):
         return self.name
 
-class InsuranceCompanyProcedure(models.Model):
-    insuranceCompany = models.ForeignKey(InsuranceCompany, on_delete=models.CASCADE,null=True, blank=True,related_name='insuranceCompanyProcedure')
-    supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE,null=True, blank=True,related_name='insuranceCompanyProcedure')
-    negotiated_price = models.DecimalField("Preço Negociado", max_digits=10, decimal_places=2)
-    procedure = models.ForeignKey(Procedure, on_delete=models.CASCADE,null=True, blank=True)
-
-    # class Meta:
-    #     unique_together = ('insuranceCompany', 'supplier', 'procedure')
-
-    def __str__(self):
-        return f"{self.insuranceCompany} - {self.supplier} - {self.procedure} - {self.negotiated_price}"
-
 class InsurancePlan(models.Model):
     name = models.CharField("Nome do Plano", max_length=255,unique=True)
     status = models.CharField("Status do Plano", max_length=20, choices=[
@@ -99,12 +87,33 @@ class InsurancePlan(models.Model):
         ('cancelado', 'Cancelado'),
         ('suspenso', 'Suspenso'),
         ('expirado', 'Expirado'),
-    ], default='ativo')
+    ], default='activo')
+    hasPlafon = models.BooleanField(default=False)
+    plafonPrice = models.DecimalField("Plafon do plano", max_digits=10, decimal_places=2,default=0)
     insuranceCompany = models.ForeignKey(InsuranceCompany, on_delete=models.CASCADE, null=True, blank=True)
-    procedure = models.ManyToManyField(Procedure, blank=True,related_name='insurancePlan')
 
     def __str__(self):
         return self.name
+
+
+class Level(models.Model):
+    plan = models.ForeignKey(InsurancePlan, on_delete=models.CASCADE, related_name="levels", verbose_name="Plano")
+    parent_level = models.ForeignKey(
+        'self', on_delete=models.CASCADE, related_name="sublevels", blank=True, null=True, verbose_name="Nível Pai"
+    )
+    name = models.CharField(max_length=255, verbose_name="Nome do Nível")
+    hasPlafon = models.BooleanField(default=False, blank=True, null=True)
+    plafonPrice = models.DecimalField("Plafon do plano", max_digits=10, decimal_places=2, default=0)
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Criado em")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Atualizado em")
+
+    def __str__(self):
+        return self.name
+
+class InsuranceCompanyProcedure(models.Model):
+    negotiated_price = models.DecimalField("Preço Negociado", max_digits=10, decimal_places=2)
+    procedure = models.ForeignKey(Procedure, on_delete=models.CASCADE,null=True, blank=True,related_name="insuranceCompanyProcedure")
+    level = models.ForeignKey(Level, on_delete=models.CASCADE, null=True, blank=True,related_name="insuranceCompanyProcedure")
 
 class Client(models.Model):
     name = models.CharField("Nome da empresa",max_length=255)
@@ -119,8 +128,8 @@ class Client(models.Model):
     contractFile = models.FileField(upload_to='static/img/clients/')
     nuitFile = models.FileField(upload_to='static/img/clients/')
     insuranceCompany = models.ForeignKey(InsuranceCompany, on_delete=models.CASCADE,null=True, blank=True)
-    user = models.ManyToManyField(User, null=True, blank=True, related_name='client')
-    insurancePlan = models.ManyToManyField(InsurancePlan, null=True, blank=True, related_name='insurancePlan')
+    # user = models.ManyToManyField(User, null=True, blank=True, related_name='client')
+    # insurancePlan = models.ManyToManyField(InsurancePlan, null=True, blank=True, related_name='insurancePlan')
 
     def __str__(self):
         return self.name

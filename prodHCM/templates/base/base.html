@@ -1,3 +1,4 @@
+{% load unicorn %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -126,9 +127,28 @@
       font-weight: 500;
       color: #333;
     }
+    .accordion-button:not(.collapsed) {
+    color: #000000;
+    background-color: #D9D9D94D;
+    }
+    .accordion-button {
+    color: #000000;
+    background-color: #D9D9D94D;
+    }
+    .accordion-body {
+      background: #f8f9fa;
+    }
+    .accordion-item {
+      border: 0;
+    }
+    .accordion-button {
+      padding: 7px
+    }
   </style>
+  {% unicorn_scripts %}
 </head>
 <body>
+{% csrf_token %}
 <nav class="navbar navbar-light bg-light p-3">
   <div class="d-flex col-12 col-md-3 col-lg-2 mb-2 mb-lg-0 flex-wrap flex-md-nowrap justify-content-center">
     {% if user_logo %}

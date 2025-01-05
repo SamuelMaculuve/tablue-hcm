@@ -1,0 +1,64 @@
+
+<div>
+    <ul class="nav nav-tabs" id="procedureTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="insert-tab" data-bs-toggle="tab" data-bs-target="#insert" type="button" role="tab" aria-controls="insert" aria-selected="true">Inserir</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="preview-tab" data-bs-toggle="tab" data-bs-target="#preview" type="button" role="tab" aria-controls="preview" aria-selected="false">Pré-visualizar</button>
+        </li>
+    </ul>
+    <div class="tab-content" id="procedureTabsContent">
+        <div class="tab-pane fade show active" id="insert" role="tabpanel" aria-labelledby="insert-tab">
+            <h3>Lista de Procedimentos</h3>
+
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Selecionar</th>
+                        <th>Código</th>
+                        <th>Procedimento</th>
+                        <th>Plafon (MT)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for procedure in procedures %}
+                        <tr>
+                            <td>
+                                <input
+                                    type="checkbox"
+                                    value="{{ procedure.id }}"
+                                    wire:click="toggle_procedure({{ procedure.id }})"
+                                >
+                            </td>
+                            <td>{{ procedure.code }}</td>
+                            <td>{{ procedure.name }}</td>
+                            <td>
+
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+              <div class="tab-pane fade" id="preview" role="tabpanel" aria-labelledby="preview-tab">
+            <h3>Pré-visualização</h3>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Procedimento</th>
+                        <th>Plafon (MT)</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                </tbody>
+            </table>
+
+            <button class="btn btn-primary">Salvar</button>
+        </div>
+
+    </div>
+</div>

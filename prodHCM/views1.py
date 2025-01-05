@@ -64,7 +64,7 @@ def insurance_plan_list(request):
         'insuranceCompany' : insuranceCompany
     }
 
-    return render(request, "insuranceCompany/plan_list.html",context)
+    return render(request, "insuranceCompany/list.html",context)
 
 @login_required
 def insurance_plan_create(request, id=0):
@@ -84,7 +84,7 @@ def insurance_plan_create(request, id=0):
             'insuranceCompany': insuranceCompany,
         }
 
-        return render(request, "insuranceCompany/add_existing_plan.html",context)
+        return render(request, "insuranceCompany/create.html",context)
     else:
         form = InsurancePlanForm(request.POST, request.FILES)
         context = {
@@ -96,7 +96,7 @@ def insurance_plan_create(request, id=0):
             return redirect('/dashboard/insurance/plan/list/',context)
         else:
 
-            return render(request, 'insuranceCompany/add_existing_plan.html', {'form': form})
+            return render(request, 'insuranceCompany/create.html', {'form': form})
 
 def insurance_supplier_list(request):
 

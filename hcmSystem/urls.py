@@ -26,4 +26,6 @@ urlpatterns = [
     path('auth/', include('prodHCM.urls')),
 
     path('dashboard/', include('prodHCM.urls')),
+
+    path("unicorn/", include("django_unicorn.urls")),
 ]

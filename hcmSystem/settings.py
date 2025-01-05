@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'crispy_bootstrap5',
     'prodHCM',
     'management',
-
+    'django_unicorn',
 ]
 
 MIDDLEWARE = [

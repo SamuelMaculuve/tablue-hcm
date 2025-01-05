@@ -12,10 +12,10 @@ from django.contrib.auth.models import Group
 
 from .forms import CustomLoginForm, InsuranceCompanyFrom, ProceduresFrom, ClientsForm, SupplierForm, \
     AddSupplierToInsuranceFrom, InsurancePlanForm, InsuranceCompanyProcedureForm, \
-    InsuranceCompanyProcedureFormSet, AddInsurancePlanClientFrom, BeneficiariesForm, IndividualsForm, CategoryFrom, \
-    SubCategoryFrom, CreateUserForm, ProfileForm
+     AddInsurancePlanClientFrom, BeneficiariesForm, IndividualsForm, CategoryFrom, \
+    SubCategoryFrom, CreateUserForm, ProfileForm, LevelForm
 from .models import InsuranceCompany, Procedure, Client, Supplier, InsurancePlan, InsuranceCompanyProcedure, \
-    Beneficiaries, BeneficiarieTreatment, Category, SubCategory, Individuals, User, Profile
+    Beneficiaries, BeneficiarieTreatment, Category, SubCategory, Individuals, User, Profile, Level
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 import requests
@@ -151,8 +151,7 @@ def insurance_plan_list(request):
         'insuranceCompany' : insuranceCompany
     }
 
-    return render(request, "insuranceCompany/plan_list.html",context)
-
+    return render(request, "insuranceCompany/plan/list.html",context)
 
 def insurance_plan_create(request, id=0):
 
@@ -173,7 +172,7 @@ def insurance_plan_create(request, id=0):
             'insuranceCompany': insuranceCompany,
         }
 
-        return render(request, "insuranceCompany/add_existing_plan.html",context)
+        return render(request, "insuranceCompany/plan/create.html",context)
     else:
         form = InsurancePlanForm(request.POST, request.FILES)
         context = {
@@ -185,17 +184,133 @@ def insurance_plan_create(request, id=0):
             messages.success(request, 'Plano criado com sucesso!')
             return redirect('/dashboard/insurance/plan/list/',context)
         else:
+            messages.error("ERRO ao criar plano")
+            return render(request, 'insuranceCompany/plan/create.html', {'form': form})
 
-            return render(request, 'insuranceCompany/add_existing_plan.html', {'form': form})
+def construir_hierarquia(niveis, parent=None, visitados=None):
+    if visitados is None:
+        visitados = set()
+
+    hierarquia = []
+    for nivel in niveis:
+        if nivel.id in visitados:
+            continue  # Ignorar ciclos ou níveis já processados
+        if nivel.parent_level == parent:
+            visitados.add(nivel.id)
+            subniveis = construir_hierarquia(niveis, parent=nivel, visitados=visitados)
+            hierarquia.append({
+                'id': nivel.id,
+                'name': nivel.name,
+                'plafonPrice': nivel.plafonPrice,
+                'insurancecompanyprocedures': list(nivel.insuranceCompanyProcedure.all()),
+                'sublevels': subniveis,
+            })
+    return hierarquia
+
+def insurance_plan_create_step2(request, id=0):
+
+    user = request.user
+
+    if request.method == "GET":
+        if id == 0 :
+            form = LevelForm()
+        else:
+            insurancePlan = get_object_or_404(InsurancePlan, id=id)
+            plan = InsurancePlan.objects.prefetch_related(
+                'levels__sublevels__insuranceCompanyProcedure'
+            ).get(id=id)
+
+            plan = InsurancePlan.objects.prefetch_related('levels__insuranceCompanyProcedure').get(id=id)
+            levels = Level.objects.filter(plan=plan).select_related('parent_level').prefetch_related('insuranceCompanyProcedure')
+            hierarquia = construir_hierarquia(levels)
+
+            form = LevelForm()
+            context = {
+                'title': insurancePlan.name,
+                'insurancePlan': insurancePlan,
+                'plan': plan,
+                'form': form,
+                'levels': levels,
+                'hierarquia': hierarquia,
+            }
+
+            return render(request, 'insuranceCompany/plan/create-step-2.html', context)
+    else:
+        plan = request.POST.get('plan')
+
+        form = LevelForm(request.POST, request.FILES)
+
+        context = {
+            'title': 'Planos',
+            'plans': InsurancePlan.objects.all()
+        }
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Adicionado com sucesso!')
+            return redirect('/dashboard/insurance/plan/add_plan_steap-2/' + str(plan), context)
+        else:
+
+            return render(request, 'insuranceCompany/plan/create.html', {'form': form})
+
+def insurance_plan_create_sublevel(request):
+
+    if request.method == "POST":
+        form = LevelForm(request.POST, request.FILES)
+
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Adicionado com sucesso!')
+            return redirect(request.META.get('HTTP_REFERER', '/fallback-url'))
+
+        else:
+            messages.error(request, 'Adicionado sem sucesso!')
+            return redirect(request.META.get('HTTP_REFERER', '/fallback-url'))
+
+    else:
+        messages.error(request, 'Adicionado sem sucesso 2!')
+        return redirect(request.META.get('HTTP_REFERER', '/fallback-url'))
+
+
+def insurance_plan_create_procedure(request, id=0):
+
+    if request.method == "GET":
+        if id == 0 :
+            form = LevelForm()
+        else:
+            insurancePlan = get_object_or_404(InsurancePlan, id=id)
+
+            context = {
+                'title': insurancePlan.name,
+                'insurancePlan': insurancePlan,
+            }
+
+            return render(request, 'insuranceCompany/plan/procedure/create_on_plan.html', context)
+    else:
+        plan = request.POST.get('plan')
+
+        form = LevelForm(request.POST, request.FILES)
+
+        context = {
+            'title': 'Planos',
+            'plans': InsurancePlan.objects.all()
+        }
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Adicionado com sucesso!')
+            return redirect('/dashboard/insurance/plan/add_plan_steap-2/' + str(plan), context)
+        else:
+
+            return render(request, 'insuranceCompany/plan/create.html', {'form': form})
+
 def insurance_plan_show(request, id):
 
     insurancePlan = get_object_or_404(InsurancePlan, id=id)
-    procedures = insurancePlan.procedure.all()
+    # procedures = insurancePlan.procedure.all()
 
     context = {
         'title': insurancePlan.name,
         'insurancePlan': insurancePlan,
-        'procedures': procedures,
+        # 'procedures': procedures,
     }
 
     return render(request, 'insuranceCompany/show_existing_plan.html', context)
@@ -331,51 +446,19 @@ def add_insurance_supplier_procedure(request,id):
 def save_procedures(request):
 
     if request.method == "POST":
-
-        try:
-            # data = json.loads(request.body)
-            # procedures_data = data.get("procedures", [])
-            procedures_data = json.loads(request.POST.get('selected_data'))
-            # selected_data = json.loads(request.POST.get('selected_data'))
-            supplier_id = json.loads(request.POST.get('supplierId'))
-
-            # insurance_company_id = getattr(request.user, 'insuranceCompany', None)
-            user = request.user
-            insurance_company_id = user.insuranceCompany.all().first()
-
-            if not procedures_data:
-                return JsonResponse({"success": False, "error": "Nenhum procedimento selecionado."})
-
-            # Loop para salvar cada procedimento selecionado com o preço negociado
-            for procedure_data in procedures_data:
-
-                procedure_id = procedure_data.get("id")
-                negotiated_price = procedure_data.get("price")
-
-                try:
-                    if not insurance_company_id.supplier.filter(id=supplier_id).exists():
-                        insurance_company_id.supplier.add(supplier_id)
-
-                    procedure = Procedure.objects.get(id=procedure_id)
-                    # Cria o registro de InsuranceCompanyProcedure
-                    print(insurance_company_id.id)
-                    InsuranceCompanyProcedure.objects.create(
-                        insuranceCompany_id=insurance_company_id.id,
-                        procedure=procedure,
-                        supplier_id=supplier_id,
-                        negotiated_price=negotiated_price
-                    )
-
-                except Procedure.DoesNotExist:
-                    return JsonResponse({"success": False, "error": f"Procedimento {procedure_id} não encontrado."})
-
+        data = json.loads(request.POST.get("procedures", "[]"))
+        for item in data:
+            procedure = Procedure.objects.get(id=item['id'])
+            InsuranceCompanyProcedure.objects.create(
+                procedure=procedure,
+                negotiated_price=item['negotiated_price'],
+                level=1
+            )
             messages.success(request, 'Procedimentos salvos com sucesso!')
-            return JsonResponse({"success": True, "message": "Procedimentos salvos com sucesso!"})
+        return JsonResponse({"message": "Procedimentos salvos com sucesso!"})
+    return JsonResponse({"error": "Método não permitido."}, status=405)
 
-        except json.JSONDecodeError as e:
-            return JsonResponse({"success": False, "error": "Erro ao processar os dados."})
 
-    return JsonResponse({"success": False, "error": "Método não permitido."})
 
 def search_suppliers(request):
 

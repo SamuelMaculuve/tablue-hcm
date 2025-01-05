@@ -30,7 +30,9 @@
             <td>{{ insurancePlan.id }}</td>
             <td>{{insurancePlan.name}}</td>
             <td><span class="badge bg-primary">{{ insurancePlan.status }}</span></td>
-            <td><a href="{% url 'insurance_plan_show' insurancePlan.id %}" class="btn btn-details"><i class="fa fa-eye"></i></a></td>
+            <td>
+              <a href="{% url 'insurance_plan_create_step2' insurancePlan.id %}" class="btn btn-details"><i class="fa fa-eye"></i></a>
+            </td>
           </tr>
           {% endfor %}
           </tbody>

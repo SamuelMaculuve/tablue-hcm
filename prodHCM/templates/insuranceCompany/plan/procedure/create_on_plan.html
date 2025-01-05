@@ -1,0 +1,206 @@
+{% extends "base/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+<style>
+
+.step-container {
+  display: flex;
+  align-items: center;
+}
+
+.step-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.step-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  font-size: 16px;
+  color: #fff;
+}
+
+.step-inactive {
+  background-color: #ccc;
+}
+
+.step-active {
+  background-color: #283593; /* Cor azul */
+}
+
+.step-label {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #333;
+}
+
+.step-divider {
+  flex: 1;
+  height: 1px;
+  background-color: #ccc;
+  margin: 0 16px;
+}
+
+</style>
+
+<div class="container d-flex justify-content-center align-items-center vh-50">
+    <div class="step-container col-8 mt-4">
+    <div class="step-item">
+      <div class="step-circle step-inactive">1</div>
+      <span class="step-label">Nome do plano</span>
+    </div>
+    <div class="step-divider"></div>
+    <div class="step-item">
+      <div class="step-circle step-active">2</div>
+      <span class="step-label">Definir níveis e procedimentos</span>
+    </div>
+  </div>
+</div>
+<div class="container-fluid d-flex justify-content-center align-items-center vh-50 pt-4">
+{% load unicorn %}
+<div>
+    <h3>Adicionar Procedimentos ao Nível</h3>
+<div>
+    <h3 id="section-title">Inserir Procedimentos</h3>
+
+    <!-- Seção de criação -->
+    <div id="create-section">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Selecionar</th>
+                    <th>Código</th>
+                    <th>Procedimento</th>
+                    <th>Preço Negociado (MT)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for procedure in procedures %}
+                    <tr>
+                        <td>
+                            <input
+                                type="checkbox"
+                                value="{{ procedure.id }}"
+                                data-code="{{ procedure.code }}"
+                                data-name="{{ procedure.name }}"
+                                data-base-price="{{ procedure.base_price }}"
+                                onchange="toggleProcedure(this)"
+                            >
+                        </td>
+                        <td>{{ procedure.code }}</td>
+                        <td>{{ procedure.name }}</td>
+                        <td>
+                            <input
+                                type="number"
+                                step="0.01"
+                                class="form-control"
+                                placeholder="Preço Negociado"
+                                data-id="{{ procedure.id }}"
+                                onchange="updateNegotiatedPrice(this)"
+                            >
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <button class="btn btn-primary" onclick="showPreview()">Pré-visualizar</button>
+    </div>
+
+    <!-- Seção de pré-visualização -->
+    <div id="preview-section" style="display: none;">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Código</th>
+                    <th>Procedimento</th>
+                    <th>Preço Final (MT)</th>
+                </tr>
+            </thead>
+            <tbody id="preview-table-body">
+                <!-- Preenchido dinamicamente pelo JavaScript -->
+            </tbody>
+        </table>
+        <button class="btn btn-secondary" onclick="showCreate()">Voltar</button>
+        <form method="POST" action="{% url 'save_procedures' %}">
+            {% csrf_token %}
+            <input type="hidden" name="procedures" id="proceduresInput">
+            <button type="submit" class="btn btn-success">Salvar</button>
+        </form>
+    </div>
+</div>
+
+</div>
+</div>
+
+<script>
+    let selectedProcedures = [];
+
+function toggleProcedure(checkbox) {
+    const procedureId = checkbox.value;
+    const procedure = {
+        id: procedureId,
+        code: checkbox.dataset.code,
+        name: checkbox.dataset.name,
+        base_price: checkbox.dataset.basePrice,
+        negotiated_price: null,
+    };
+
+    if (checkbox.checked) {
+        selectedProcedures.push(procedure);
+    } else {
+        selectedProcedures = selectedProcedures.filter(p => p.id !== procedureId);
+    }
+}
+
+function updateNegotiatedPrice(input) {
+    const procedureId = input.dataset.id;
+    const negotiatedPrice = parseFloat(input.value);
+
+    selectedProcedures = selectedProcedures.map(p => {
+        if (p.id === procedureId) {
+            return { ...p, negotiated_price: negotiatedPrice };
+        }
+        return p;
+    });
+}
+
+function showPreview() {
+    const previewBody = document.getElementById("preview-table-body");
+    previewBody.innerHTML = "";
+
+    selectedProcedures.forEach(p => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td>${p.code}</td>
+            <td>${p.name}</td>
+            <td>${p.negotiated_price || p.base_price}</td>
+        `;
+        previewBody.appendChild(row);
+    });
+
+    document.getElementById("create-section").style.display = "none";
+    document.getElementById("preview-section").style.display = "block";
+    document.getElementById("section-title").textContent = "Pré-visualização";
+}
+
+function showCreate() {
+    document.getElementById("create-section").style.display = "block";
+    document.getElementById("preview-section").style.display = "none";
+    document.getElementById("section-title").textContent = "Inserir Procedimentos";
+}
+
+document.querySelector("form").addEventListener("submit", function (e) {
+    document.getElementById("proceduresInput").value = JSON.stringify(selectedProcedures);
+});
+
+</script>
+{% endblock content %}

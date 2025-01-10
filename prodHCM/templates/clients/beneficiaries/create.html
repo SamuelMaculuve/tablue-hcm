@@ -21,15 +21,23 @@
             {{ form.email|as_crispy_field }}
         </div>
         <div class="col-md-3">
-            {{ form.insurancePlan|as_crispy_field }}
-        </div>
-        <div class="col-md-3">
-            {{ form.plafon|as_crispy_field }}
-        </div>
-        <div class="col-md-3">
+            <div id="div_id_insurancePlan" class="mb-3">
+                <label for="id_insurancePlan" class="form-label">
+                    Plano
+                </label>
+                <select name="insurancePlan" class="select form-select" id="id_insurancePlan">
+                    <option value="" selected="">---------</option>
+                      {% for insurancePlan in insurancePlans %}
+                         <option value="{{ insurancePlan.id }}">{{ insurancePlan.name }}</option>
+                      {% endfor %}
+                    </select>
+                    </div>
+                </div>
+
+        <div class="col-md-2">
             {{ form.phoneNumber|as_crispy_field }}
         </div>
-        <div class="col-md-2">
+        <div class="col-md-1">
             <button type="button" class="btn btn-dark mt-4" id="addBeneficiary">Adicionar</button>
         </div>
     </div>
@@ -43,7 +51,6 @@
                     <th>Email</th>
                     <th>Plano de Seguro</th>
                     <th>Número de celular</th>
-                    <th>Plafon</th>
                     <th>Ações</th>
                 </tr>
             </thead>

@@ -2,7 +2,6 @@
 {% load crispy_forms_tags %}
 {% block content %}
 
-  {% include "includes/sucess_modal_dialog.html" %}
 
 <style>
         .floating-btn {
@@ -94,38 +93,7 @@
              {% endfor %}
       </div>
     </div>
-
     <div>
-
-
-<!--        {% for level in plan.levels.all %}-->
-<!--            <div>-->
-<!--                <strong>{{ level.name }} ({{ levels.plafonPrice }} MT)</strong>-->
-
-<!--                &lt;!&ndash; Categorias do nível &ndash;&gt;-->
-<!--&lt;!&ndash;                <div class="categoria">&ndash;&gt;-->
-<!--&lt;!&ndash;                    {% for categoria in nivel.categorias.all %}&ndash;&gt;-->
-<!--&lt;!&ndash;                        - {{ categoria.nome }} ({{ categoria.preco }} MT)<br>&ndash;&gt;-->
-<!--&lt;!&ndash;                    {% endfor %}&ndash;&gt;-->
-<!--&lt;!&ndash;                </div>&ndash;&gt;-->
-
-<!--                &lt;!&ndash; Subníveis do nível &ndash;&gt;-->
-<!--                <div class="nivel">-->
-<!--                    {% for sublevel in level.sublevels.all %}-->
-<!--                        <div>-->
-<!--                            <strong style="color: red;">{{ sublevel.name }} ({{ sublevel.plafonPrice }} MT)</strong>-->
-
-<!--                            &lt;!&ndash; Categorias do subnível &ndash;&gt;-->
-<!--&lt;!&ndash;                            <div class="categoria">&ndash;&gt;-->
-<!--&lt;!&ndash;                                {% for categoria in subnivel.categorias.all %}&ndash;&gt;-->
-<!--&lt;!&ndash;                                    - {{ categoria.nome }} ({{ categoria.preco }} MT)<br>&ndash;&gt;-->
-<!--&lt;!&ndash;                                {% endfor %}&ndash;&gt;-->
-<!--&lt;!&ndash;                            </div>&ndash;&gt;-->
-<!--                        </div>-->
-<!--                    {% endfor %}-->
-<!--                </div>-->
-<!--            </div>-->
-<!--        {% endfor %}-->
   </div>
 
 </div>
@@ -221,5 +189,6 @@
   </div>
 </div>
 
+{% include "includes/sucess_modal_dialog.html" %}
 {% endblock content %}
 

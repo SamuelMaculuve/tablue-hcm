@@ -68,19 +68,17 @@
 <div class="container-fluid d-flex justify-content-center align-items-center vh-50 pt-4">
 {% load unicorn %}
 <div>
-    <h3>Adicionar Procedimentos ao Nível</h3>
-<div>
-    <h3 id="section-title">Inserir Procedimentos</h3>
+    <h3 id="section-title">Lista de procedimentos</h3>
 
     <!-- Seção de criação -->
     <div id="create-section">
         <table class="table">
             <thead>
                 <tr>
-                    <th>Selecionar</th>
+                    <th></th>
                     <th>Código</th>
                     <th>Procedimento</th>
-                    <th>Preço Negociado (MT)</th>
+                    <th>Plafon</th>
                 </tr>
             </thead>
             <tbody>
@@ -122,22 +120,25 @@
                 <tr>
                     <th>Código</th>
                     <th>Procedimento</th>
-                    <th>Preço Final (MT)</th>
+                    <th>Plafon</th>
                 </tr>
             </thead>
             <tbody id="preview-table-body">
                 <!-- Preenchido dinamicamente pelo JavaScript -->
             </tbody>
         </table>
-        <button class="btn btn-secondary" onclick="showCreate()">Voltar</button>
-        <form method="POST" action="{% url 'save_procedures' %}">
+
+        <div class="d-flex justify-content-end gap-3 mt-4">
+
+         <button class="btn btn-cancel" onclick="showCreate()">Voltar</button>
+        <form method="POST" action="{% url 'save_procedures' %}" enctype="multipart/form-data">
             {% csrf_token %}
             <input type="hidden" name="procedures" id="proceduresInput">
-            <button type="submit" class="btn btn-success">Salvar</button>
+            <input type="hidden" name="level" value="{{ level.id }}">
+            <button type="submit" class="btn btn-confirm">Salvar</button>
         </form>
+        </div>
     </div>
-</div>
-
 </div>
 </div>
 
@@ -199,6 +200,7 @@ function showCreate() {
 }
 
 document.querySelector("form").addEventListener("submit", function (e) {
+    console.log(selectedProcedures)
     document.getElementById("proceduresInput").value = JSON.stringify(selectedProcedures);
 });
 

@@ -4,7 +4,8 @@
       <div class="form-section">
         <div class="beneficiarie">
             <p>Nome: {{ beneficiarie.name }}</p>
-            <p>Empresa: {{ client.name }}</p>
+            <p>Empresa: {{ beneficiarie.client.name }}</p>
+            <p>Plano: {{ beneficiarie.insurancePlan.name }}</p>
         </div>
         <p style="font-weight: 400;">Lista de procedimento
         </p>
@@ -16,18 +17,19 @@
                 <tr>
                     <th>ID</th>
                     <th>Procedimento</th>
+                    <th>Plafon</th>
                     <th></th>
                 </tr>
             </thead>
             <tbody>
                 {% for procedure in procedures %}
                     <tr>
-                        <td>{{ procedure.id }}</td>
-                        <td>{{ procedure.name }}</td>
+                        <td>{{ procedure.procedure.id }}</td>
+                        <td>{{ procedure.procedure.name }}</td>
+                        <td>{{ procedure.negotiated_price }}</td>
                         <td>
                             <input type="checkbox" class="procedure-checkbox" value="{{ procedure.id }}">
                         </td>
-
                     </tr>
                 {% endfor %}
             </tbody>

@@ -114,6 +114,7 @@ class InsuranceCompanyProcedure(models.Model):
     negotiated_price = models.DecimalField("Preço Negociado", max_digits=10, decimal_places=2)
     procedure = models.ForeignKey(Procedure, on_delete=models.CASCADE,null=True, blank=True,related_name="insuranceCompanyProcedure")
     level = models.ForeignKey(Level, on_delete=models.CASCADE, null=True, blank=True,related_name="insuranceCompanyProcedure")
+    # insurancePlan = models.ForeignKey(InsurancePlan, on_delete=models.CASCADE,null=True, blank=True, related_name="insuranceCompanyProcedure")
 
 class Client(models.Model):
     name = models.CharField("Nome da empresa",max_length=255)
@@ -129,11 +130,10 @@ class Client(models.Model):
     nuitFile = models.FileField(upload_to='static/img/clients/')
     insuranceCompany = models.ForeignKey(InsuranceCompany, on_delete=models.CASCADE,null=True, blank=True)
     # user = models.ManyToManyField(User, null=True, blank=True, related_name='client')
-    # insurancePlan = models.ManyToManyField(InsurancePlan, null=True, blank=True, related_name='insurancePlan')
+    insurancePlan = models.ManyToManyField(InsurancePlan, blank=True, related_name='client')
 
     def __str__(self):
         return self.name
-
 
 class Beneficiaries(models.Model):
     name = models.CharField("Nome da Completo",max_length=255,null=True, blank=True)
@@ -149,6 +149,69 @@ class Beneficiaries(models.Model):
     client = models.ForeignKey(Client, on_delete=models.CASCADE, null=True, blank=True, related_name='beneficiaries')
     insuranceCompany = models.ForeignKey(InsuranceCompany, on_delete=models.CASCADE, null=True, blank=True, related_name='beneficiaries')
     insurancePlan = models.ForeignKey(InsurancePlan, on_delete=models.CASCADE, related_name='beneficiaries',null=True, blank=True)
+
+    def clone_plan(self, plan):
+
+        # Criar um novo BeneficiaryPlan
+        beneficiary_plan = BeneficiaryPlan.objects.create(
+            beneficiary=self,
+            plafon=plan.plafonPrice
+        )
+
+        # Função para clonar níveis de forma recursiva
+        def clone_level(level, parent_copied=None):
+            # Clonar o nível atual
+            beneficiary_level = BeneficiaryLevel.objects.create(
+                insurancePlan=beneficiary_plan,
+                name=level.name,
+                plafonPrice=level.plafonPrice,
+                hasPlafon=level.hasPlafon,
+                parent_level=parent_copied  # Associar ao nível pai já clonado, se existir
+            )
+
+            # Clonar os procedimentos associados ao nível
+            for procedure in level.insuranceCompanyProcedure.all():
+                BeneficiaryICProcedure.objects.create(
+                    level=beneficiary_level,
+                    procedure=procedure.procedure,
+                    negotiated_price=procedure.negotiated_price
+                )
+
+            # Clonar os subníveis associados
+            for sublevel in level.sublevels.all():
+                clone_level(sublevel, parent_copied=beneficiary_level)
+
+        # Iniciar a clonagem dos níveis principais do plano
+        for level in plan.levels.filter(parent_level__isnull=True):  # Apenas os níveis principais
+            clone_level(level)
+
+    # def clone_plan(self, plan):
+    #     # Criar um novo BeneficiaryPlan
+    #     beneficiary_plan = BeneficiaryPlan.objects.create(
+    #         beneficiary=self,
+    #         plafon=plan.plafonPrice
+    #     )
+    #
+    #     # Clonar os níveis associados ao plano
+    #     for level in plan.levels.all():
+    #         # Clonar o nível
+    #         beneficiary_level = BeneficiaryLevel.objects.create(
+    #             insurancePlan=beneficiary_plan,
+    #             name=level.name,
+    #             plafonPrice=level.plafonPrice,
+    #             hasPlafon=level.hasPlafon,
+    #             parent_level=level.parent_level  # Clonando o nível pai, se existir
+    #         )
+    #
+    #         # Clonar os procedimentos associados ao nível
+    #         for procedure in level.insuranceCompanyProcedure.all():
+    #             BeneficiaryICProcedure.objects.create(
+    #                 level=beneficiary_level,
+    #                 procedure=procedure.procedure,
+    #                 negotiated_price=procedure.negotiated_price
+    #             )
+
+
 
     def __str__(self):
         return self.name
@@ -184,4 +247,28 @@ class Profile(models.Model):
     preferred_color = models.CharField(max_length=20, blank=True, null=True, default="#000")
     logo = models.ImageField(upload_to='static/img/profile_logo/', blank=True, null=True)
     photo = models.ImageField(upload_to='static/img/profile_photos/', blank=True, null=True)
+
+class BeneficiaryPlan(models.Model):
+    beneficiary = models.ForeignKey(Beneficiaries, on_delete=models.CASCADE, related_name="beneficiaryPlan")
+    plafon = models.DecimalField("Plafon Restante", max_digits=10, decimal_places=2, default=0)
+    status = models.CharField("Status do Plano", max_length=20, choices=[
+        ('activo', 'Activo'),
+        ('cancelado', 'Cancelado'),
+        ('suspenso', 'Suspenso'),
+        ('expirado', 'Expirado'),
+    ], default='activo')
+
+class BeneficiaryLevel(models.Model):
+    insurancePlan = models.ForeignKey(BeneficiaryPlan, on_delete=models.CASCADE, related_name="beneficiaryLevel", null=True, blank=True)
+    parent_level = models.ForeignKey('self', on_delete=models.CASCADE, related_name="sublevels", blank=True, null=True)
+    name = models.CharField(max_length=255, null=True, blank=True)
+    hasPlafon = models.BooleanField(default=False, blank=True, null=True)
+    plafonPrice = models.DecimalField("Plafon do plano", max_digits=10, decimal_places=2, default=0)
+
+class BeneficiaryICProcedure(models.Model):
+    negotiated_price = models.DecimalField("Preço Negociado", max_digits=10, decimal_places=2,default=0)
+    procedure = models.ForeignKey(Procedure, on_delete=models.CASCADE,null=True, blank=True,related_name="beneficiaryICProcedure")
+    level = models.ForeignKey(BeneficiaryLevel, on_delete=models.CASCADE, null=True, blank=True,related_name="beneficiaryICProcedure")
+    # insurancePlan = models.ForeignKey(BeneficiaryPlan, on_delete=models.CASCADE,null=True, blank=True, related_name="beneficiaryICProcedure")
+
 

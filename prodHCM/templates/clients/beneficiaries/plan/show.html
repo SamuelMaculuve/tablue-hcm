@@ -1,0 +1,104 @@
+{% extends "base/base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+
+
+<style>
+        .floating-btn {
+            position: fixed;
+            bottom: 100px;
+            right: 200px;
+            z-index: 1050; /* Fica acima do conteúdo */
+        }
+        .div-icon {
+            border: 1px solid #D9D9D9;
+            padding: 10px;
+        }
+    </style>
+<style>
+
+.step-container {
+  display: flex;
+  align-items: center;
+}
+
+.step-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.step-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  font-size: 16px;
+  color: #fff;
+}
+
+.step-inactive {
+  background-color: #ccc;
+}
+
+.step-active {
+  background-color: #283593; /* Cor azul */
+}
+
+.step-label {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #333;
+}
+
+.step-divider {
+  flex: 1;
+  height: 1px;
+  background-color: #ccc;
+  margin: 0 16px;
+}
+
+</style>
+
+<div class="container d-flex justify-content-center align-items-center vh-50">
+    <div class="step-container col-8 mt-4">
+    <div class="step-item">
+      <div class="step-circle step-inactive">1</div>
+      <span class="step-label">Nome do plano</span>
+    </div>
+    <div class="step-divider"></div>
+    <div class="step-item">
+      <div class="step-circle step-active">2</div>
+      <span class="step-label">Definir níveis ou procedimentos</span>
+    </div>
+  </div>
+</div>
+<div class="container-fluid d-flex justify-content-center align-items-center vh-50 pt-4">
+<div class="accordion" id="accordionPanelsStayOpenExample">
+  <div class="accordion-item">
+    <h2 class="accordion-header" id="panelsStayOpen-headingOne">
+      <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true" aria-controls="panelsStayOpen-collapseOne">
+          {{ beneficiaryPlan.beneficiary.insurancePlan.name }} ({{ beneficiaryPlan.plafon }} MT)  <i class="fa fa-pencil" style="margin-left: 10px;border-radius: 25px;padding: 7px;background: #d9d9d9;"></i>
+      </button>
+    </h2>
+    <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
+      <div class="accordion-body">
+        <div>
+             {% for level in hierarquia %}
+                {% include 'clients/beneficiaries/plan/subnivel_template.html' with nivel=level %}
+             {% endfor %}
+      </div>
+    </div>
+    <div>
+  </div>
+
+</div>
+
+</div>
+
+{% endblock content %}
+

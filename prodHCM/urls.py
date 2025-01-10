@@ -16,6 +16,7 @@ urlpatterns = [
     path('insurance/plan/add_plan_steap-2/<int:id>/', views.insurance_plan_create_step2, name='insurance_plan_create_step2'),
     path('insurance/plan/add_plan_procedure/<int:id>/', views.insurance_plan_create_procedure, name='insurance_plan_create_procedure'),
     path('insurance/plan/insurance_plan_create_sublevel', views.insurance_plan_create_sublevel, name='insurance_plan_create_sublevel'),
+    path('insurance/plan/save_procedures/', views.save_procedures, name='save_procedures'),
     path('insurance/plan/show_plan/<int:id>/', views.insurance_plan_show, name='insurance_plan_show'),
     path('insurance/supplier/list/', views.insurance_supplier_list, name='insurance_supplier_list'),
     path('insurance/supplier/create/', views.add_insurance_supplier, name='add_insurance_supplier'),
@@ -44,6 +45,7 @@ urlpatterns = [
     path('client/show_link/<int:id>/', views.client_show_link, name='client_show_link'),
     path('client/beneficiarie/<str:session>/<int:client>/', views.client_beneficiaries_store, name='client_beneficiaries_store'),
     path('client/beneficiaries/create/<int:client_id>/', views.beneficiarie_client_create, name='beneficiarie_client_create'),
+    path('client/beneficiary/plan/show/<int:id>/', views.beneficiary_plan_show, name='beneficiary_plan_show'),
     path('client/plan/store/', views.client_plan_store, name='client_plan_store'),
 
     #supplier
@@ -54,7 +56,7 @@ urlpatterns = [
     path('supplier/client/show/<int:id>/', views.supplier_client_show, name='supplier_client_show'),
     path('supplier/procedures/', views.supplier_procedures, name='supplier_procedures'),
 
-    path('save-procedures/', views.save_procedures, name='save_procedures'),
+
     path('search-suppliers/', views.search_suppliers, name='search_suppliers'),
 
     # user

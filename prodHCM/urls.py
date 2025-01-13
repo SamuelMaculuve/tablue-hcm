@@ -66,9 +66,11 @@ urlpatterns = [
     path('manage_profile', views.manage_profile, name="manage_profile"),
 
     # treatment
-    path('treatment/create/', views.treatment_form, name='treatment_form'),
-    path('treatment/list/', views.treatment_list, name='treatment_list'),
-    path('treatment/show/', views.treatment_show, name='treatment_show'),
+    path('supplier/treatment/create/', views.treatment_create, name='treatment_create'),
+    path('supplier/treatment/list/', views.treatment_list, name='treatment_list'),
+    path('supplier/treatment/show/', views.treatment_show, name='treatment_show'),
+    # path('supplier/treatment/show/<int:id>/', views.treatment_show, name='treatment_show'),
+    path('supplier/treatment/plan/save_treatment_procedures/', views.save_treatment_procedures, name='save_treatment_procedures'),
 
     path("get-session-data/", views.get_session_data, name="get_session_data"),
 

@@ -16,7 +16,7 @@ from .forms import CustomLoginForm, InsuranceCompanyFrom, ProceduresFrom, Client
     SubCategoryFrom, CreateUserForm, ProfileForm, LevelForm
 from .models import InsuranceCompany, Procedure, Client, Supplier, InsurancePlan, InsuranceCompanyProcedure, \
     Beneficiaries, BeneficiarieTreatment, Category, SubCategory, Individuals, User, Profile, Level, BeneficiaryPlan, \
-    BeneficiaryLevel
+    BeneficiaryLevel, BeneficiaryICProcedure
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 import requests
@@ -1045,7 +1045,7 @@ def supplier_client_show(request,id):
 
 def supplier_procedures(request):
 
-    # supplier = getattr(request.user, 'supplier', None)
+    #supplier = getattr(request.user, 'supplier', None)
 
     user = request.user
     supplier = user.supplier.all().first()
@@ -1362,17 +1362,21 @@ def get_session_data(request,client):
         return JsonResponse({"error": "Erro na requisição", "details": str(e)}, status=500)
 
 def treatment_list(request):
+    user = request.user
 
-    beneficiaries = Beneficiaries.objects.all()
+    supplier = Supplier.objects.get(user=user)
+    beneficiarieTreatments = BeneficiarieTreatment.objects.filter(supplier=supplier)
+
+    print(beneficiarieTreatments)
 
     context = {
         'title': 'Atendimento',
-        'beneficiaries' : beneficiaries
+        'beneficiarieTreatments' : beneficiarieTreatments
     }
 
     return render(request, "treatment/list.html",context)
 
-def treatment_form(request, id=0):
+def treatment_create2(request, id=0):
 
     # insuranceCompany = getattr(request.user, 'insuranceCompany', None)
     user = request.user
@@ -1406,25 +1410,35 @@ def treatment_form(request, id=0):
             return redirect('/dashboard/client/list/', context)
         else:
             return render(request, 'treatment/create.html', {'form': form})
+def treatment_show(request, id=0):
 
-def treatment_show(request):
+    beneficiarieTreatment = get_object_or_404(BeneficiarieTreatment, id=id)
+
+    context = {
+       'title': "Detalhes do tratamento",
+       'beneficiarieTreatment': beneficiarieTreatment,
+    }
+
+    return render(request, 'treatment/show.html', context)
+
+def treatment_create(request):
 
     procedures = Procedure.objects.all()
     beneficiarie = []
     search_query = request.POST.get('id')
     try:
         if search_query.isdigit():
-            beneficiarie = Beneficiaries.objects.get(pk=int(search_query))
 
-            insurance_plan = beneficiarie.insurancePlan
-            # Obter todos os níveis associados ao plano
-            levels = insurance_plan.levels.all()
+            beneficiary = Beneficiaries.objects.get(pk=int(search_query))
 
-            # Obter todos os procedimentos associados a esses níveis
-            procedures = InsuranceCompanyProcedure.objects.filter(level__in=levels)
+            beneficiaryPlan = BeneficiaryPlan.objects.get(beneficiary=beneficiary)
+
+            beneficiaryLevels = BeneficiaryLevel.objects.filter(insurancePlan=beneficiaryPlan)
+
+            procedures = BeneficiaryICProcedure.objects.filter(level__in=beneficiaryLevels)
 
         else:
-            beneficiarie = Beneficiaries.objects.get(phoneNumber=search_query)
+            beneficiary = Beneficiaries.objects.get(phoneNumber=search_query)
         # beneficiarie = Beneficiaries.objects.get(pk=request.POST['id'])
     except Beneficiaries.DoesNotExist:
         messages.error(request, f'Beneficiario não encontrado')
@@ -1432,12 +1446,122 @@ def treatment_show(request):
 
 
     context = {
-        'title': beneficiarie.name,
-        'beneficiarie': beneficiarie,
+        'title': beneficiary.name,
+        'beneficiary': beneficiary,
         'procedures': procedures,
     }
 
-    return render(request, 'treatment/show.html', context)
+    return render(request, 'treatment/create.html', context)
+
+def check_plafon(procedure, limite=10):
+
+    nivel_atual = procedure.level
+
+    while nivel_atual:
+
+        if nivel_atual.plafonPrice > limite:
+            nivel_atual.plafonPrice
+            # return False
+        nivel_atual = nivel_atual.parent_level
+
+    return True
+
+def update_plafon(procedure, limite):
+
+    nivel_atual = procedure.level
+
+    while nivel_atual:
+
+        if nivel_atual.plafonPrice > limite:
+            nivel_atual.plafonPrice = nivel_atual.plafonPrice - limite
+            nivel_atual.save()
+        nivel_atual = nivel_atual.parent_level
+
+    return True
+
+def save_treatment_procedures(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+
+            procedures_data = data.get("procedures", [])
+
+            beneficiary_id = data.get("beneficiary")
+
+            beneficiary = Beneficiaries.objects.get(pk=int(beneficiary_id))
+
+            user = request.user
+
+            supplier = Supplier.objects.get(user=user)
+
+            beneficiaryPlan = BeneficiaryPlan.objects.get(beneficiary=beneficiary)
+
+            if not procedures_data:
+                return JsonResponse({"success": False, "error": "Nenhum procedimento selecionado."})
+
+            treatments = []
+            treatment = BeneficiarieTreatment.objects.create(
+                beneficiarie=beneficiary,
+                description="Descrição do tratamento",
+                supplier=supplier
+            )
+            for procedure_data in procedures_data:
+                procedure_id = procedure_data.get("procedure_id")
+
+                try:
+
+                    procedure = BeneficiaryICProcedure.objects.get(id=procedure_id)
+
+                    canContinue = check_plafon(procedure, procedure.procedure.base_price)
+
+                    if canContinue:
+                        update_plafon(procedure,procedure.procedure.base_price)
+                        procedure.negotiated_price = procedure.negotiated_price - procedure.procedure.base_price
+                        procedure.save()
+
+                        treatment.procedure.add(procedure.procedure)
+
+                    else:
+                        return JsonResponse({"success": False, "error": f"Procedimento {procedure_id} não tem plafon."})
+
+                except Procedure.DoesNotExist:
+                    return JsonResponse({"success": False, "error": f"Procedimento {procedure_id} não tem plafon."})
+
+            if treatments:
+                BeneficiarieTreatment.objects.bulk_create(treatments)
+            return JsonResponse({"success": True, "message": "Procedimentos salvos com sucesso!"})
+
+        except json.JSONDecodeError as e:
+            return JsonResponse({"success": False, "error": "Erro ao processar os dados."})
+
+    return JsonResponse({"success": False, "error": "Método não permitido."})
+
+
+def verificar_plafon_por_procedimento(hierarquia, procedimento, limite=10):
+    """
+    Verifica se o plafonPrice dos níveis hierárquicos e do procedimento atendem a uma condição.
+
+    Args:
+        hierarquia (list): A lista de níveis hierárquicos.
+        procedimento (str): O nome do procedimento a ser verificado.
+        limite (int): O valor limite para a verificação do plafonPrice.
+
+    Returns:
+        bool: True se todas as condições forem atendidas, False caso contrário.
+    """
+    for nivel in hierarquia:
+        # Verifica se o procedimento está neste nível
+        if procedimento in nivel['insurancecompanyprocedures']:
+            # Se o plafonPrice do nível atual é válido
+            return nivel['plafonPrice'] > limite
+
+        # Verifica recursivamente nos subníveis
+        if nivel['sublevels']:
+            resultado = verificar_plafon_por_procedimento(nivel['sublevels'], procedimento, limite)
+            if resultado:
+                # Verifica se o nível atual também atende ao limite
+                return nivel['plafonPrice'] > limite
+    return False
 
 def user_list(request):
 
@@ -1496,3 +1620,4 @@ def manage_profile(request):
         }
 
     return render(request, 'auth/profile/manage_profile.html', context)
+

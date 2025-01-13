@@ -23,15 +23,19 @@
           <thead class="table-custom">
           <tr>
             <th>ID</th>
-            <th>Nome da empresa</th>
-            <th>Contacto</th>
-            <th>Endereço</th>
+            <th>Beneficiário</th>
+            <th>Plano</th>
             <th>Detalhes</th>
           </tr>
           </thead>
           <tbody>
-          {% for beneficiaries in beneficiaries %}
-
+          {% for beneficiarieTreatment in beneficiarieTreatments %}
+              <tr>
+                <td>{{ beneficiarieTreatment.id }}</td>
+                <td>{{ beneficiarieTreatment.beneficiarie.name}}</td>
+                <td>{{ beneficiarie.beneficiarie.insurancePlan.name}}</td>
+                <td><a href="{% url 'treatment_create' beneficiarieTreatment.id %}" class="btn btn-details"><i class="fa fa-eye"></i></a></td>
+              </tr>
           {% endfor %}
           </tbody>
         </table>
@@ -46,7 +50,7 @@
         </div>
         <div class="modal-body">
 
-         <form id="procedure-form" method="POST" action="{% url 'treatment_show' %}">
+         <form id="procedure-form" method="POST" action="{% url 'treatment_create' %}">
               {% csrf_token %}
                <input type="number" class="form-control" name="id" placeholder="ID do Membro ou número de celular" required>
              <button class="btn register-button mt-3" type="submit">Próximo</button>

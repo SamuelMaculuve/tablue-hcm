@@ -102,10 +102,10 @@
                       <thead class="table-custom">
                       <tr>
                         <th>ID</th>
-                        <th>Nome da empresa</th>
+                        <th>Nome</th>
+                        <th>Celular</th>
                         <th>Email</th>
-                        <th>Nivel</th>
-                        <th>Detalhes</th>
+                        <th>Plano</th>
                       </tr>
                       </thead>
                       <tbody>
@@ -113,9 +113,9 @@
                       <tr>
                         <td>{{ beneficiaries.id }}</td>
                         <td>{{beneficiaries.name}}</td>
+                        <td>{{beneficiaries.phoneNumber}}</td>
                         <td>{{beneficiaries.email}}</td>
                         <td><a href="{% url 'beneficiary_plan_show' beneficiaries.id %}">{{beneficiaries.insurancePlan}}</a></td>
-                        <td><a href="#" class="btn btn-details"><i class="fa fa-eye"></i></a></td>
                       </tr>
                       {% endfor %}
                       </tbody>

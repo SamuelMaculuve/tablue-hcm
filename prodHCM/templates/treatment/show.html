@@ -3,9 +3,9 @@
 <div class="container">
       <div class="form-section">
         <div class="beneficiarie">
-            <p>Nome: {{ beneficiarie.name }}</p>
-            <p>Empresa: {{ beneficiarie.client.name }}</p>
-            <p>Plano: {{ beneficiarie.insurancePlan.name }}</p>
+            <p>Nome: {{ beneficiary.name }}</p>
+            <p>Empresa: {{ beneficiary.client.name }}</p>
+            <p>Plano: {{ beneficiary.insurancePlan.name }}</p>
         </div>
         <p style="font-weight: 400;">Lista de procedimento
         </p>
@@ -24,11 +24,12 @@
             <tbody>
                 {% for procedure in procedures %}
                     <tr>
-                        <td>{{ procedure.procedure.id }}</td>
+                        <td>{{ procedure.id }}</td>
                         <td>{{ procedure.procedure.name }}</td>
-                        <td>{{ procedure.negotiated_price }}</td>
+                        <td>{{ procedure.procedure.base_price }}</td>
                         <td>
                             <input type="checkbox" class="procedure-checkbox" value="{{ procedure.id }}">
+                            <input type="hidden" class="procedure-checkbox" value="{{ beneficiary.id }}" id="beneficiary">
                         </td>
                     </tr>
                 {% endfor %}
@@ -41,7 +42,7 @@
      <div class="modal-dialog modal-fullscreen">
          <div class="modal-content">
                       <div class="modal-header">
-                        <h5 class="modal-title" id="beneficiariosModalModalLabel">O processo foi bem sucedido? <a href="#">Continuar <i class="fa fa-arrow-circle-right"></i> </a></h5>
+                        <h5 class="modal-title" id="beneficiariosModalModalLabel">O processo foi bem sucedido? <a href="#" id="save-button">Continuar <i class="fa fa-arrow-circle-right"></i> </a></h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                       </div>
                       <div class="modal-body">
@@ -72,6 +73,7 @@
         // Função JavaScript para capturar os IDs dos checkboxes selecionados e o preço negociado
         document.addEventListener("DOMContentLoaded", function () {
             document.getElementById("save-button").addEventListener("click", function (event) {
+
                 event.preventDefault(); // Impede o envio padrão do formulário
 
                 // Coletar os IDs dos checkboxes marcados e os preços negociados
@@ -79,10 +81,9 @@
                     document.querySelectorAll(".procedure-checkbox:checked")
                 ).map(checkbox => {
                     const row = checkbox.closest('tr');
-                    const negotiatedPrice = row.querySelector(".negotiated-price").value; // Captura o preço negociado
+                    // const negotiatedPrice = row.querySelector(".negotiated-price").value; // Captura o preço negociado
                     return {
                         procedure_id: checkbox.value,
-                        negotiated_price: negotiatedPrice
                     };
                 });
 
@@ -92,7 +93,7 @@
                 }
 
                 // Fazer a requisição AJAX
-                fetch("{% url 'save_procedures' %}", {
+                fetch("{% url 'save_treatment_procedures' %}", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -100,8 +101,7 @@
                     },
                     body: JSON.stringify({
                         procedures: selectedProcedures,
-                        insurance_company_id: document.getElementById("insurance-company-id").value,
-                        supplier_id: document.getElementById("supplier-id").value
+                        beneficiary: document.getElementById("beneficiary").value,
                     })
                 })
                 .then(response => response.json())

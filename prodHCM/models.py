@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractUser
 import datetime
 from django.contrib.auth.models import User
 from django.contrib.auth.models import Group
+from django.utils.timezone import now
 
 
 class SupplierType(models.Model):
@@ -152,13 +153,11 @@ class Beneficiaries(models.Model):
 
     def clone_plan(self, plan):
 
-        # Criar um novo BeneficiaryPlan
         beneficiary_plan = BeneficiaryPlan.objects.create(
             beneficiary=self,
             plafon=plan.plafonPrice
         )
 
-        # Função para clonar níveis de forma recursiva
         def clone_level(level, parent_copied=None):
             # Clonar o nível atual
             beneficiary_level = BeneficiaryLevel.objects.create(
@@ -166,10 +165,9 @@ class Beneficiaries(models.Model):
                 name=level.name,
                 plafonPrice=level.plafonPrice,
                 hasPlafon=level.hasPlafon,
-                parent_level=parent_copied  # Associar ao nível pai já clonado, se existir
+                parent_level=parent_copied
             )
 
-            # Clonar os procedimentos associados ao nível
             for procedure in level.insuranceCompanyProcedure.all():
                 BeneficiaryICProcedure.objects.create(
                     level=beneficiary_level,
@@ -177,41 +175,11 @@ class Beneficiaries(models.Model):
                     negotiated_price=procedure.negotiated_price
                 )
 
-            # Clonar os subníveis associados
             for sublevel in level.sublevels.all():
                 clone_level(sublevel, parent_copied=beneficiary_level)
 
-        # Iniciar a clonagem dos níveis principais do plano
         for level in plan.levels.filter(parent_level__isnull=True):  # Apenas os níveis principais
             clone_level(level)
-
-    # def clone_plan(self, plan):
-    #     # Criar um novo BeneficiaryPlan
-    #     beneficiary_plan = BeneficiaryPlan.objects.create(
-    #         beneficiary=self,
-    #         plafon=plan.plafonPrice
-    #     )
-    #
-    #     # Clonar os níveis associados ao plano
-    #     for level in plan.levels.all():
-    #         # Clonar o nível
-    #         beneficiary_level = BeneficiaryLevel.objects.create(
-    #             insurancePlan=beneficiary_plan,
-    #             name=level.name,
-    #             plafonPrice=level.plafonPrice,
-    #             hasPlafon=level.hasPlafon,
-    #             parent_level=level.parent_level  # Clonando o nível pai, se existir
-    #         )
-    #
-    #         # Clonar os procedimentos associados ao nível
-    #         for procedure in level.insuranceCompanyProcedure.all():
-    #             BeneficiaryICProcedure.objects.create(
-    #                 level=beneficiary_level,
-    #                 procedure=procedure.procedure,
-    #                 negotiated_price=procedure.negotiated_price
-    #             )
-
-
 
     def __str__(self):
         return self.name
@@ -235,12 +203,10 @@ class Individuals(models.Model):
         return self.name
 
 class BeneficiarieTreatment(models.Model):
+    description = models.CharField(max_length=255, null=True, blank=True)
     beneficiarie = models.ForeignKey(Beneficiaries, on_delete=models.CASCADE, related_name='beneficiarieTreatment')
-    procedure = models.ForeignKey(Procedure, on_delete=models.CASCADE, null=True, blank=True, related_name='beneficiarieTreatment')
-
-
-    def __str__(self):
-        return f"Treatment for {self.beneficiarie} - {self.procedure}"
+    procedure = models.ManyToManyField(Procedure, null=True, blank=True, related_name='beneficiarieTreatment')
+    supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE, null=True, blank=True,related_name='beneficiarieTreatment')
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')

@@ -18,18 +18,6 @@
         <div>
             <span class="fw-bold">{{ level.name }}</span> <span class="text-muted">({{ level.plafonPrice|default:"N/A" }} MT)</span>
         </div>
-
-        <div class="d-flex gap-2 pt-2" style="margin-left: 200px">
-            <button class="btn btn-primary btn-custom" data-bs-toggle="modal" data-bs-target="#staticBackdrop{{ level.id }}" >
-                <i class="fa fa-plus"></i>
-            </button>
-            <button class="btn btn-primary btn-custom">
-                <i class="fa fa-pencil"></i>
-            </button>
-            <button class="btn btn-danger btn-custom" style="background-color: #dc3545">
-                <i class="fa fa-trash"></i>
-            </button>
-        </div>
     </div>
     <ul style="margin-left: 10px;list-style-type:none;margin-bottom: 0">
         {% for insuranceCompany in level.beneficiaryICProcedure %}
@@ -39,11 +27,6 @@
                     <div>
                         <span>{{ insuranceCompany.procedure }}</span> <span class="text-muted">({{ insuranceCompany.negotiated_price|default:"N/A" }} MT)</span>
                     </div>
-
-                    <div class="d-flex gap-2 pt-2" style="margin-left: 200px">
-                        <button class="btn btn-danger btn-custom" style="background-color: #dc3545">
-                            <i class="fa fa-ban"></i>
-                        </button>
                     </div>
             </li>
         {% endfor %}

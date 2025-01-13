@@ -1,82 +1,119 @@
 {% extends "base/base.html" %}
-{% load crispy_forms_tags %}
 {% block content %}
-
-        {% for field in form %}
-        {% if field.errors %}
-            <div class="error">
-                {% for error in field.errors %}
-                    <p>{{ error }}</p>
+<div class="container">
+      <div class="form-section">
+        <div class="beneficiarie">
+            <p>Nome: {{ beneficiary.name }}</p>
+            <p>Empresa: {{ beneficiary.client.name }}</p>
+            <p>Plano: {{ beneficiary.insurancePlan.name }}</p>
+        </div>
+        <p style="font-weight: 400;">Lista de procedimento
+        </p>
+      <div class="table-responsive mt-4">
+    <form id="procedure-form">
+        {% csrf_token %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Procedimento</th>
+                    <th>Plafon</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for procedure in procedures %}
+                    <tr>
+                        <td>{{ procedure.id }}</td>
+                        <td>{{ procedure.procedure.name }}</td>
+                        <td>{{ procedure.procedure.base_price }}</td>
+                        <td>
+                            <input type="checkbox" class="procedure-checkbox" value="{{ procedure.id }}">
+                            <input type="hidden" class="procedure-checkbox" value="{{ beneficiary.id }}" id="beneficiary">
+                        </td>
+                    </tr>
                 {% endfor %}
-            </div>
-        {% endif %}
-    {% endfor %}
-<form action="" method="post" autocomplete="off" enctype="multipart/form-data">
-    {% csrf_token %}
+            </tbody>
+        </table>
 
-   <div class="row g-4 mt-4">
-     <div class="col-md-6">
-          {{form.insuranceCompany|as_crispy_field}}
-            <div class="mb-3">
-              {{form.name|as_crispy_field}}
-            </div>
+        <!-- Botão para salvar -->
+        <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#beneficiariosModalModal">Continuar</button>
+       <div class="modal fade" id="beneficiariosModalModal" tabindex="-1" aria-labelledby="beneficiariosModalModalLabel" aria-hidden="true">
+     <div class="modal-dialog modal-fullscreen">
+         <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="beneficiariosModalModalLabel">O processo foi bem sucedido? <a href="#" id="save-button">Continuar <i class="fa fa-arrow-circle-right"></i> </a></h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                         <div class="iframe-container">
+                            <iframe class="embed-responsive-item"  allow="camera; microphone"  src="https://fnbsdk.tablu.tech?id=ggpsz4PAG1yCQlqaXR3O372" allowfullscreen></iframe>
+                        </div>
 
-            <div class="mb-3">
-                {{form.province|as_crispy_field}}
-            </div>
+                      </div>
+         </div>
+     </div>
+</div>
 
-            <div class="row">
-              <div class="col-md-6 mb-3">
-                {{form.nuitNumber|as_crispy_field}}
-              </div>
-              <div class="col-md-6 mb-3">
-                {{form.date_of_activity_start|as_crispy_field}}
-              </div>
-            </div>
+    </form>
+</div>
+      </div>
+    </div>
+<script>
+    // Aguarda o carregamento completo da página
+    document.addEventListener('DOMContentLoaded', function () {
+      // Seleciona o modal pelo ID
+      var myModal = new bootstrap.Modal(document.getElementById('beneficiariosModalModal'));
 
-            <div class="file-upload">
-              <i class="fa fa-cloud-upload-alt"></i>
-              <span>Anexar declaração de representante legal <span class="text-danger">*</span></span>
-            </div>
-            <div class="file-upload mt-3">
-              <i class="fa fa-cloud-upload-alt"></i>
-              <span>Anexar contracto de sociedade <span class="text-danger">*</span></span>
-            </div>
-          </div>
-        <div class="col-md-6">
-            <div class="row">
-              <div class="col-md-12">
-                {{form.district|as_crispy_field}}
-              </div>
-            </div>
+      // Abre o modal
+      // myModal.show();
+    });
+</script>
+<script>
+        // Função JavaScript para capturar os IDs dos checkboxes selecionados e o preço negociado
+        document.addEventListener("DOMContentLoaded", function () {
+            document.getElementById("save-button").addEventListener("click", function (event) {
 
-            <div class="mb-3">
-              {{form.address|as_crispy_field}}
-            </div>
+                event.preventDefault(); // Impede o envio padrão do formulário
 
-            <div class="row">
-              <div class="col-md-6 mb-3">
-                {{form.email|as_crispy_field}}
-              </div>
-              <div class="col-md-6 mb-3">
-                {{form.phoneNumber|as_crispy_field}}
-              </div>
-            </div>
+                // Coletar os IDs dos checkboxes marcados e os preços negociados
+                const selectedProcedures = Array.from(
+                    document.querySelectorAll(".procedure-checkbox:checked")
+                ).map(checkbox => {
+                    const row = checkbox.closest('tr');
+                    // const negotiatedPrice = row.querySelector(".negotiated-price").value; // Captura o preço negociado
+                    return {
+                        procedure_id: checkbox.value,
+                    };
+                });
 
-            <div class="file-uploaded">
-              <i class="fa fa-cloud-upload-alt"></i>
-               <input type="file" name="nuitFile" class="form-control" id="id_nuitFile" required="">
-            </div>
-            <div class="file-uploaded mt-3">
-              <i class="fa fa-cloud-upload-alt"></i>
-              <input type="file" name="contractFile" class="form-control" id="id_contractFile" required="">
-            </div>
-          </div>
-   </div>
-   <div class="d-flex justify-content-end gap-3 mt-4">
-       <button type="button" class="btn btn-cancel mr-4">Cancelar</button>
-       <button type="submit" class="btn btn-confirm">Confirmar</button>
-   </div>
-</form>
+                if (selectedProcedures.length === 0) {
+                    alert("Selecione pelo menos um procedimento.");
+                    return;
+                }
 
+                // Fazer a requisição AJAX
+                fetch("{% url 'save_treatment_procedures' %}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": "{{ csrf_token }}"
+                    },
+                    body: JSON.stringify({
+                        procedures: selectedProcedures,
+                        beneficiary: document.getElementById("beneficiary").value,
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert("Procedimentos salvos com sucesso!");
+                    } else {
+                        alert(data.error || "Erro ao salvar procedimentos.");
+                    }
+                })
+                .catch(error => console.error("Erro na requisição:", error));
+            });
+        });
+    </script>
 {% endblock content %}
